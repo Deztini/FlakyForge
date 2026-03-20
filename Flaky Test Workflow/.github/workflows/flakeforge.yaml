@@ -1,0 +1,29 @@
+name: FlakeSense Runner
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  detect-flaky:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run FlakeSense
+        run: node scripts/flakesense-runner.js
+
+      - name: Send results
+        run: |
+          curl -X POST https://your-api.com/test-run \
+          -H "Authorization: Bearer ${{ secrets.FLAKEFORGE_API_KEY }}" \
+          -H "Content-Type: application/json" \
+          -d @flaky-results.json
