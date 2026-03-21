@@ -7,6 +7,7 @@ import {
   AlertCircle,
   type LucideIcon,
 } from "lucide-react";
+import { Card } from "../Card";
 
 interface Feature {
   icon: LucideIcon;
@@ -30,7 +31,8 @@ const features: Feature[] = [
     iconColor: "text-[#22C55E]",
     bgColor: "bg-[#22C55E]/20",
     title: "Auto Repair",
-    description: "Applies targeted AST-based code fixes depending on the detected cause",
+    description:
+      "Applies targeted AST-based code fixes depending on the detected cause",
   },
   {
     icon: Github,
@@ -70,13 +72,15 @@ export function FeaturesSection() {
   return (
     <section id="features" className="py-20 px-6 bg-[#0A0D14]/50">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-white text-[36px] font-bold mb-12">Everything you need</h2>
+        <h2 className="text-white text-[36px] font-bold mb-12">
+          Everything you need
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <div
+              <Card
                 key={feature.title}
                 className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6"
               >
@@ -85,9 +89,13 @@ export function FeaturesSection() {
                 >
                   <Icon className={`w-5 h-5 ${feature.iconColor}`} />
                 </div>
-                <h3 className="text-white text-[15px] font-semibold mb-2">{feature.title}</h3>
-                <p className="text-[#94A3B8] text-[14px]">{feature.description}</p>
-              </div>
+                <h3 className="text-white text-[15px] font-semibold mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-[#94A3B8] text-[14px]">
+                  {feature.description}
+                </p>
+              </Card>
             );
           })}
         </div>

@@ -1,5 +1,6 @@
 import { Github, Play, Brain, Wrench } from "lucide-react";
 import { type ReactNode } from "react";
+import { Card } from "../Card";
 
 interface Step {
   number: number;
@@ -54,7 +55,7 @@ export function HowItWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {steps.map((st) => (
-            <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-7">
+            <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-7">
               <div className="w-8 h-8 rounded-full bg-[#6C63FF] flex items-center justify-center mb-4">
                 <span className="text-white text-[14px] font-semibold">
                   {st.number}
@@ -67,7 +68,7 @@ export function HowItWorks() {
               <p className="text-[#94A3B8] text-[14px] text-center">
                 {st.description}
               </p>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
