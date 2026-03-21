@@ -1,14 +1,16 @@
-import { Loader2 } from 'lucide-react';
-import type { ReactNode, ButtonHTMLAttributes, MouseEventHandler } from 'react';
+import { Loader2 } from "lucide-react";
+import type { ReactNode, ButtonHTMLAttributes, MouseEventHandler } from "react";
+
+type ButtonType = "submit" | "reset" | "button";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
   children: ReactNode;
-  handleClick: MouseEventHandler<HTMLButtonElement>
+  type?: ButtonType;
+  handleClick?: MouseEventHandler<HTMLButtonElement>;
 }
-
 
 export function Button({
   isLoading = false,
@@ -17,13 +19,15 @@ export function Button({
   children,
   disabled,
   handleClick,
-  className = '',
+  type,
+  className = "",
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || isLoading;
 
   return (
     <button
+      type={type}
       onClick={handleClick}
       disabled={isDisabled}
       className={`rounded-lg ${className}`}
@@ -35,9 +39,7 @@ export function Button({
         leftIcon && <span className="shrink-0">{leftIcon}</span>
       )}
       <span>{children}</span>
-      {!isLoading && rightIcon && (
-        <span className="shrink-0">{rightIcon}</span>
-      )}
+      {!isLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
     </button>
   );
 }

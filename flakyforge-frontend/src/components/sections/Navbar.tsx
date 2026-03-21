@@ -1,4 +1,4 @@
-import { Button } from "../button";
+import { Button } from "../Button";
 import { Logo } from "../Logo";
 import { Link, useNavigate } from "@tanstack/react-router";
 
