@@ -206,7 +206,7 @@ function flakyTestPage() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Row */}
+      
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
           <div className="text-[#94A3B8] text-[13px] mb-2">
@@ -238,9 +238,8 @@ function flakyTestPage() {
         </div>
       </div>
 
-      {/* Table Card */}
+     
       <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
-        {/* Table Header */}
         <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
           <div>
             <h3 className="text-white text-[16px] font-semibold">
@@ -262,7 +261,6 @@ function flakyTestPage() {
           </div>
         </div>
 
-        {/* Filter Pills */}
         <div className="px-6 py-4 border-b border-[#1E2139] flex items-center gap-2">
           <button className="h-7 px-3.5 bg-[#6C63FF] text-white rounded-full text-[13px]">
             All ({flakyTests.length})
@@ -278,7 +276,6 @@ function flakyTestPage() {
           </button>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#0F1117]">
@@ -368,7 +365,6 @@ function flakyTestPage() {
           </table>
         </div>
 
-        {/* Pagination */}
         <div className="p-4 flex items-center justify-between border-t border-[#1E2139]">
           <div className="text-[#94A3B8] text-[13px]">
             Showing {flakyTests.length} of {flakyTests.length} flaky tests
