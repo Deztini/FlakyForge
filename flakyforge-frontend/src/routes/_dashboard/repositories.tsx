@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Github, Star, Plus } from "lucide-react";
+import { Card } from "../../components/Card";
 
 const repositories = [
   {
@@ -64,6 +65,13 @@ const repositories = [
   },
 ];
 
+const repoStatistics = [
+  { title: "Total Repositories", value: "6" },
+  { title: "Active Scans", value: "1" },
+  { title: "Total Flaky Tests", value: "45" },
+  { title: "Total Fixed", value: "55" },
+];
+
 export const Route = createFileRoute("/_dashboard/repositories")({
   component: repositoryPage,
 });
@@ -71,7 +79,6 @@ export const Route = createFileRoute("/_dashboard/repositories")({
 function repositoryPage() {
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-white text-[24px] font-semibold mb-1">
@@ -87,38 +94,21 @@ function repositoryPage() {
         </button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">
-            Total Repositories
-          </div>
-          <div className="text-white text-[32px] font-bold">6</div>
-        </div>
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Active Scans</div>
-          <div className="text-white text-[32px] font-bold">1</div>
-        </div>
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">
-            Total Flaky Tests
-          </div>
-          <div className="text-white text-[32px] font-bold">45</div>
-        </div>
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Total Fixed</div>
-          <div className="text-white text-[32px] font-bold">55</div>
-        </div>
+        {repoStatistics.map((rep) => (
+          <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">{rep.title}</div>
+            <div className="text-white text-[32px] font-bold">{rep.value}</div>
+          </Card>
+        ))}
       </div>
 
-      {/* Repositories Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
         {repositories.map((repo) => (
-          <div
+          <Card
             key={repo.name}
             className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6 hover:border-[#6C63FF]/50 transition-colors"
           >
-            {/* Header */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#6C63FF]/20 rounded-lg flex items-center justify-center">
@@ -151,12 +141,10 @@ function repositoryPage() {
               )}
             </div>
 
-            {/* Description */}
             <p className="text-[#94A3B8] text-[13px] mb-4">
               {repo.description}
             </p>
 
-            {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-[#1E2139]">
               <div>
                 <div className="text-[#94A3B8] text-[11px] mb-1">
@@ -178,7 +166,6 @@ function repositoryPage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-2">
               <button className="flex-1 h-9 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium">
                 Run Scan
@@ -187,7 +174,7 @@ function repositoryPage() {
                 View Details
               </button>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>
