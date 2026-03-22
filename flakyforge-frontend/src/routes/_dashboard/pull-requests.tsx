@@ -6,6 +6,7 @@ import {
   Clock,
   XCircle,
 } from "lucide-react";
+import { Card } from "../../components/Card";
 
 const pullRequests = [
   {
@@ -153,6 +154,25 @@ const pullRequests = [
   },
 ];
 
+const prStatistics = [
+  {
+    title: "Total PRs",
+    value: "142",
+  },
+  {
+    title: "Merged",
+    value: "87",
+  },
+  {
+    title: "Open",
+    value: "39",
+  },
+  {
+    title: "Closed",
+    value: "12",
+  },
+];
+
 export const Route = createFileRoute("/_dashboard/pull-requests")({
   component: pullRequestPage,
 });
@@ -182,31 +202,15 @@ function pullRequestPage() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Total PRs</div>
-          <div className="text-white text-[32px] font-bold">142</div>
-        </div>
-
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Merged</div>
-          <div className="text-white text-[32px] font-bold mb-1">87</div>
-          <div className="text-[#6C63FF] text-[12px]">61% merge rate</div>
-        </div>
-
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Open</div>
-          <div className="text-white text-[32px] font-bold">43</div>
-        </div>
-
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Closed</div>
-          <div className="text-white text-[32px] font-bold">12</div>
-        </div>
+        {prStatistics.map((pr) => (
+          <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">{pr.title}</div>
+            <div className="text-white text-[32px] font-bold">{pr.value}</div>
+          </Card>
+        ))}
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex items-center gap-2">
         <button className="h-9 px-4 bg-[#6C63FF] text-white rounded-lg text-[13px] font-medium">
           All PRs
@@ -222,22 +226,19 @@ function pullRequestPage() {
         </button>
       </div>
 
-      {/* Pull Requests List */}
       <div className="space-y-3">
         {pullRequests.map((pr) => (
-          <div
+          <Card
             key={pr.id}
             className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6 hover:border-[#6C63FF]/50 transition-colors"
           >
             <div className="flex items-start gap-4">
-              {/* Icon */}
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center ${getStatusBadgeColors(pr.statusColor)}`}
               >
                 {getStatusIcon(pr.status)}
               </div>
 
-              {/* Content */}
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -264,12 +265,10 @@ function pullRequestPage() {
                   </span>
                 </div>
 
-                {/* Description */}
                 <p className="text-[#94A3B8] text-[13px] mb-3">
                   {pr.description}
                 </p>
 
-                {/* Meta Info */}
                 <div className="flex items-center gap-6 mb-4">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#6C63FF]"></div>
@@ -293,7 +292,6 @@ function pullRequestPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-2">
                   <button className="h-8 px-4 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium flex items-center gap-2">
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -308,7 +306,7 @@ function pullRequestPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
