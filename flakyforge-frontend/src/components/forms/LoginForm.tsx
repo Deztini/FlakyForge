@@ -5,6 +5,7 @@ import { Logo } from "../Logo";
 import { Github, Lock } from "lucide-react";
 import { useLogin } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../hooks/useAuth";
+import { Link } from "@tanstack/react-router";
 
 
 export function LoginForm() {
@@ -99,9 +100,9 @@ export function LoginForm() {
 
           <p className="text-center text-[#94A3B8] text-[13px] mt-5">
             Don't have an account?{" "}
-            <a href="#" className="text-[#6C63FF] hover:underline">
+            <Link to="/signup" className="text-[#6C63FF] hover:underline">
               Get started free
-            </a>
+            </Link>
           </p>
 
           <div className="mt-6 pt-6 border-t border-[#2D3148]">
