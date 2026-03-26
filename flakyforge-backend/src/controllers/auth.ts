@@ -7,6 +7,7 @@ import {
 } from "../validators/auth.schema";
 import { AuthService } from "../services/authService";
 import { ApiError } from "../utils/ApiError";
+import { signAccessToken } from "../utils/jwt";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -33,7 +34,7 @@ export const AuthController = {
     const { email } = resendOtpSchema.parse(req.body);
 
     const result = await AuthService.resendOtp(email);
-    
+
     res.status(200).json(result);
   } catch (err) {
     next(err);
@@ -66,6 +67,26 @@ export const AuthController = {
           message: result.message,
           accessToken: result.accessToken,
           user: result.user,
+        });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+   async githubCallback(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user;
+
+      const payload = {userId: user._id.toString(), email: user?.email}
+
+      const token = signAccessToken(payload);
+
+      res
+        .status(200)
+        .json({
+          success: true,
+          token,
+          user
         });
     } catch (error) {
       next(error);

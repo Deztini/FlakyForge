@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import passport from "passport";
+import "./config/github";
 import router from "./routes/index"
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -11,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use(passport.initialize());
 
 app.use("/api", router);
 
