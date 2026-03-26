@@ -6,7 +6,7 @@ export function FooterSection() {
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <Logo size="sm" />
         <p className="text-[#94A3B8] text-[13px]">
-          © 2025 FlakeForge. Built for developers who care about test
+          © 2025 FlakeyRadar. Built for developers who care about test
           reliability.
         </p>
       </div>

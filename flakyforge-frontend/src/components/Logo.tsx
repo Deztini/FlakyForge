@@ -28,7 +28,7 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
       </div>
       {showText && (
         <span className={`${textSizes[size]} font-semibold text-white tracking-tight`}>
-          FlakeForge
+          FlakeyRadar
         </span>
       )}
     </div>

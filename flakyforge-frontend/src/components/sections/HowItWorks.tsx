@@ -46,7 +46,7 @@ export function HowItWorks() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-white text-[36px] font-bold mb-3">
-            How FlakeForge Works
+            How FlakeyRadar Works
           </h2>
           <p className="text-[#94A3B8] text-[16px]">
             From repository to repaired test in four simple steps

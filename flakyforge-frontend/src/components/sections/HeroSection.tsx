@@ -18,7 +18,7 @@ export function HeroSection() {
         </h1>
 
         <p className="text-[#94A3B8] text-[18px] max-w-2xl mx-auto mb-8">
-          FlakeForge uses fine-tuned AI to classify the root cause of flaky
+          FlakeyRadar uses fine-tuned AI to classify the root cause of flaky
           tests - async, concurrency, or network - and applies intelligent
           repairs in minutes.
         </p>
