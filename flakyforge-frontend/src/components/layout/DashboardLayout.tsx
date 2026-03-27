@@ -18,18 +18,15 @@ export function DashboardLayout({ title, breadcrumb }: DashboardLayoutProps) {
     ? getErrorMessage(logoutMutation.error)
     : null;
 
-  const fullName = user?.name.split(" ");
-  const firstName = fullName[0];
-  const lastName = fullName[1];
-  const firstInitials = firstName.charAt(0);
-  const secondInitials = lastName.charAt(0);
-  const fullInitials = firstInitials + secondInitials;
+  const [firstName = "", lastName = ""] = user?.fullName?.split(" ") ?? [];
+
+  const fullInitials = (firstName.charAt(0) || "") + (lastName.charAt(0) || "");
 
   const currentUser = {
-    name: user?.name ,
+    name: user?.fullName,
     role: user?.role,
     initials: fullInitials,
-    onLogout: () => logoutMutation.mutate()
+    onLogout: () => logoutMutation.mutate(),
   };
   return (
     <div className="min-h-screen w-full bg-[#0F1117] flex">

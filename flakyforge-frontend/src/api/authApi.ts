@@ -19,7 +19,7 @@ export interface VerifyOtpInput {
 
 export interface AuthUser {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
   role: string;
 }

@@ -3,7 +3,7 @@ import { Button } from "../Button";
 import { Input } from "../Input";
 import { Logo } from "../Logo";
 import { Github, Lock } from "lucide-react";
-import { useLogin } from "../../hooks/useAuth";
+import { useLogin, useGithubLogin } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../hooks/useAuth";
 import { Link } from "@tanstack/react-router";
 
@@ -14,6 +14,8 @@ export function LoginForm() {
 
   const loginMutation = useLogin();
 
+    const { login: githubLogin } = useGithubLogin();
+
   const errorMessage = loginMutation.error
     ? getErrorMessage(loginMutation.error)
     : null;
@@ -23,7 +25,9 @@ export function LoginForm() {
     loginMutation.mutate({ email, password });
   };
 
-  const handleGithubLogin = () => {};
+  const handleGithubLogin = () => {
+    githubLogin();
+  };
 
   return (
     <div className="min-h-screen w-full bg-[#0F1117] flex items-center justify-center p-4">
