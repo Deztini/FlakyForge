@@ -1,4 +1,6 @@
 import axios from "axios";
+import { useAuthStore } from "../store/authStore";
+import type { AuthUser } from "../api/authApi";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -6,7 +8,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -35,7 +37,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes("/auth/login")) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -51,8 +53,8 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await api.post<{ accessToken: string }>("/auth/refresh");
-        localStorage.setItem("accessToken", data.accessToken);
+        const { data } = await api.post<{ accessToken: string; user: AuthUser }>("/auth/refresh");
+        useAuthStore.getState().setAuth(data.user, data.accessToken);
         processQueue(null, data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);

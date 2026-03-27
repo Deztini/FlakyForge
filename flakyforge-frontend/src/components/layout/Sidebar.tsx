@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Logo } from "../Logo";
 import { useNavigate, useLocation, Link } from "@tanstack/react-router";
+import { Button } from "../Button";
 
 const navItems = [
   {
@@ -93,12 +94,12 @@ function SidebarUser({ name, role, initials, onLogout }: SidebarUserProps) {
           <div className="text-white text-[14px]">{name}</div>
           <div className="text-[#94A3B8] text-[12px]">{role}</div>
         </div>
-        <button
-          onClick={onLogout}
+        <Button
+          handleClick={onLogout}
           className="text-[#94A3B8] hover:text-white transition-colors"
         >
           <LogOut className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );
