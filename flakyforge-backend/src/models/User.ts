@@ -1,4 +1,4 @@
-import mongoose, {Document, Schema} from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
   fullName: string;
@@ -8,14 +8,28 @@ export interface IUser extends Document {
   isVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  provider: string;
 }
 
-const UserSchema = new Schema<IUser>({
-  fullName: {type: String, required: true},
-  email: {type: String, required: true, unique: true, lowercase: true},
-  password: {type: String, required: true},
-  role: {type: String, default: "Developer"},
-  isVerified: {type: Boolean, default: false}
-}, {timestamps: true});
+const UserSchema = new Schema<IUser>(
+  {
+    fullName: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    provider: {
+      type: String,
+      enum: ["local", "github"],
+      default: "local",
+    },
+    password: {
+      type: String,
+      required: function () {
+        return this.provider === "local";
+      },
+    },
+    role: { type: String, default: "Developer" },
+    isVerified: { type: Boolean, default: false },
+  },
+  { timestamps: true },
+);
 
 export const User = mongoose.model<IUser>("User", UserSchema);

@@ -22,7 +22,7 @@ router.get(
 
 router.get(
   "/github/callback",
-  passport.authenticate("github", { session: false }),
+  passport.authenticate("github", { session: false, failureRedirect: `${process.env.FRONTEND_URL}/auth/github/callback?error=github_auth_failed`  }),
   AuthController.githubCallback
 );
 

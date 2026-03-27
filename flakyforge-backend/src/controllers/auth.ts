@@ -3,11 +3,13 @@ import {
   loginSchema,
   otpSchema,
   signupSchema,
-  resendOtpSchema
+  resendOtpSchema,
 } from "../validators/auth.schema";
 import { AuthService } from "../services/authService";
 import { ApiError } from "../utils/ApiError";
-import { signAccessToken } from "../utils/jwt";
+import { signAccessToken, signRefreshToken } from "../utils/jwt";
+import { RefreshToken } from "../models/RefreshToken";
+import { env } from "../config/env";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -30,16 +32,16 @@ export const AuthController = {
   },
 
   async resendOtp(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { email } = resendOtpSchema.parse(req.body);
+    try {
+      const { email } = resendOtpSchema.parse(req.body);
 
-    const result = await AuthService.resendOtp(email);
+      const result = await AuthService.resendOtp(email);
 
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
-  }
-},
+      res.status(200).json(result);
+    } catch (err) {
+      next(err);
+    }
+  },
 
   async verifyOtp(req: Request, res: Response, next: NextFunction) {
     try {
@@ -61,46 +63,62 @@ export const AuthController = {
 
       res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
 
-      res
-        .status(200)
-        .json({
-          message: result.message,
-          accessToken: result.accessToken,
-          user: result.user,
-        });
+      res.status(200).json({
+        message: result.message,
+        accessToken: result.accessToken,
+        user: result.user,
+      });
     } catch (error) {
       next(error);
     }
   },
 
-   async githubCallback(req: Request, res: Response, next: NextFunction) {
+  async githubCallback(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = req.user;
+      const user = req.user as any;
 
-      const payload = {userId: user._id.toString(), email: user?.email}
+      console.log(user);
 
-      const token = signAccessToken(payload);
+      if (!user) {
+        return res.redirect(
+          `${env.FRONTEND_URL}/auth/github/callback?error=no_user`,
+        );
+      }
 
-      res
-        .status(200)
-        .json({
-          success: true,
-          token,
-          user
-        });
+      const payload = { userId: user._id.toString(), email: user?.email };
+
+      const accessToken = signAccessToken(payload);
+      const refreshToken = signRefreshToken(payload);
+
+      await RefreshToken.create({
+        token: refreshToken,
+        userId: user._id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+
+      res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
+
+      const frontendUrl = env.FRONTEND_URL;
+
+      res.redirect(`${frontendUrl}/auth/github/callback?token=${accessToken}`);
     } catch (error) {
-      next(error);
+      const frontendUrl = env.FRONTEND_URL;
+
+      res.redirect(
+        `${frontendUrl}/auth/github/callback?error=github_auth_failed`,
+      );
     }
   },
 
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const token = req.cookies?.refreshToken;
-      if (!token) throw ApiError.unauthorized('No refresh token');
+      if (!token) throw ApiError.unauthorized("No refresh token");
 
-      const { accessToken, refreshToken, user } = await AuthService.refresh(token);
+      const { accessToken, refreshToken, user } =
+        await AuthService.refresh(token);
 
-      res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+      res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
 
       res.status(200).json({ accessToken, user });
     } catch (err) {
@@ -114,9 +132,9 @@ export const AuthController = {
 
       if (token) await AuthService.logout(token);
 
-      res.clearCookie('refreshToken', COOKIE_OPTIONS);
+      res.clearCookie("refreshToken", COOKIE_OPTIONS);
 
-      res.status(200).json({ message: 'Logged out successfully' });
+      res.status(200).json({ message: "Logged out successfully" });
     } catch (err) {
       next(err);
     }

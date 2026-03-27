@@ -1,26 +1,61 @@
 import passport from "passport";
-import {Strategy as GithubStrategy} from "passport-github2";
+import { Strategy as GithubStrategy } from "passport-github2";
 import { User } from "../models/User";
 import { env } from "./env";
 import { RefreshToken } from "../models/RefreshToken";
+import axios from "axios";
 
-passport.use(new GithubStrategy({clientID: env.GITHUB_CLIENT_ID, clientSecret: env.GITHUB_CLIENT_SECRET, callbackURL: "/api/auth/github/callback"}, async (accessToken, RefreshToken, profile, done) => {
-  try {
-   const email = profile.emails?.[0]?.value;
-   
-   let user = await User.findOne({email});
+passport.use(
+  new GithubStrategy(
+    {
+      clientID: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
+      callbackURL: `${env.BACKEND_URL}/api/auth/github/callback`,
+      proxy: true,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        let email = profile.emails?.[0]?.value;
 
-   if (!user) {
-    user = await User.create({
-      email,
-      fullName: profile.displayName || profile.username,
-      password: "",
-      isVerified: true
-    });
-   }
+        if (!email) {
+          const response = await axios.get(
+            "https://api.github.com/user/emails",
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            },
+          );
 
-   return done(null, user);
-  } catch (err) {
-    return done(err, undefined);
-  }
-}))
+          const primaryEmail = response.data.find(
+            (e: any) => e.primary && e.verified,
+          );
+
+          email = primaryEmail?.email;
+        }
+        
+        console.log(email);
+
+        if (!email) {
+          return done(new Error("GitHub email not available"), undefined);
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+          user = await User.create({
+            email,
+            fullName: profile.displayName || profile.username,
+            password: "",
+            isVerified: true,
+            provider: "github",
+          });
+        }
+
+        return done(null, user);
+      } catch (err) {
+        return done(err, undefined);
+      }
+    },
+  ),
+);
