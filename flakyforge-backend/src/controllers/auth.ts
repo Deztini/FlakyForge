@@ -98,11 +98,11 @@ export const AuthController = {
       const token = req.cookies?.refreshToken;
       if (!token) throw ApiError.unauthorized('No refresh token');
 
-      const { accessToken, refreshToken } = await AuthService.refresh(token);
+      const { accessToken, refreshToken, user } = await AuthService.refresh(token);
 
       res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
 
-      res.status(200).json({ accessToken });
+      res.status(200).json({ accessToken, user });
     } catch (err) {
       next(err);
     }

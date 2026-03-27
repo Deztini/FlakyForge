@@ -146,7 +146,7 @@ export const AuthService = {
         id: user._id.toString(),
         name: user.fullName,
         email: user.email,
-        role: user.role
+        role: user.role,
       },
     };
   },
@@ -154,8 +154,13 @@ export const AuthService = {
   async refresh(token: string) {
     const decoded = verifyRefreshToken(token);
 
+    const refreshedUser = await User.findOne({ email: decoded.email });
+
+    if (!refreshedUser) {
+      throw ApiError.unauthorized("User not found");
+    }
+
     const storedRefreshToken = await RefreshToken.findOne({ token });
-    console.log(storedRefreshToken);
 
     if (!storedRefreshToken) {
       throw ApiError.unauthorized("Invalid refresh token");
@@ -177,7 +182,16 @@ export const AuthService = {
       expiresAt: new Date(Date.now() + REFRESH_EXPIRY),
     });
 
-    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      user: {
+        id: refreshedUser._id.toString(),
+        name: refreshedUser.fullName,
+        email: refreshedUser.email,
+        role: refreshedUser.role,
+      },
+    };
   },
 
   async logout(token: string) {
