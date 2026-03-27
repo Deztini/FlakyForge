@@ -1,9 +1,12 @@
+import { useAuthStore } from "../../store/authStore";
 import { Button } from "../Button";
 import { Logo } from "../Logo";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 export function Navbar() {
   const navigate = useNavigate();
+
+  const {isAuthenticated} = useAuthStore();
   return (
     <nav className="w-full h-16 bg-[#0F1117] border-b border-[#1E2139] px-6">
       <div className="max-w-7xl mx-auto h-full flex items-center justify-between">
@@ -26,7 +29,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <Button
-            handleClick={() => navigate({ to: "/login" })}
+            handleClick={() => navigate({ to: isAuthenticated ? "/dashboard" : "/login" })}
             className="h-9 px-5 border border-[#6C63FF] text-[#6C63FF]  hover:bg-[#6C63FF]/10 transition-colors text-[14px] font-medium"
           >
             Sign In
