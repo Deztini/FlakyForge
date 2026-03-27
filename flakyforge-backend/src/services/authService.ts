@@ -146,6 +146,7 @@ export const AuthService = {
         id: user._id.toString(),
         name: user.fullName,
         email: user.email,
+        role: user.role
       },
     };
   },
