@@ -6,18 +6,23 @@ import { useAuthStore } from "../../../store/authStore";
 type GithubCallbackSearch = {
   token?: string;
   error?: string;
+  name?: string;
+  email?: string;
 };
 
 export const Route = createFileRoute("/auth/github/callback")({
   validateSearch: (search: Record<string, unknown>): GithubCallbackSearch => ({
     token: search.token as string | undefined,
     error: search.error as string | undefined,
+    name: search.name as string | undefined,
+    email: search.email as string | undefined,
   }),
   component: GithubCallbackPage,
 });
 
 function GithubCallbackPage() {
-  const { token, error } = Route.useSearch();
+  const { token, error, name, email } = Route.useSearch();
+  console.log(token, error, name, email);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
@@ -27,11 +32,11 @@ function GithubCallbackPage() {
       return;
     }
 
-    if (token) {
+    if (token && name && email) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         setAuth(
-          { id: payload.userId, email: payload.email, name: payload.email, role: "Developer" },
+          { id: payload.userId, email: email, fullName: name, role: "Developer" },
           token,
         );
         navigate({ to: "/dashboard" });
@@ -39,7 +44,7 @@ function GithubCallbackPage() {
         navigate({ to: "/login" });
       }
     }
-  }, [token, error, navigate, setAuth]);
+  }, [token, error, name, email, navigate, setAuth]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] p-4">
