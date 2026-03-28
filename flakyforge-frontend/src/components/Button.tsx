@@ -30,7 +30,7 @@ export function Button({
       type={type}
       onClick={handleClick}
       disabled={isDisabled}
-      className={`rounded-lg ${className}`}
+      className={`rounded-lg cursor-pointer ${className}`}
       {...props}
     >
       {isLoading ? (
