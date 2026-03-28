@@ -1,15 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { createFileRoute } from "@tanstack/react-router";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { AuthGuard } from "../components/guards/AuthGuard";
 
-export const Route = createFileRoute('/_dashboard')({
+export const Route = createFileRoute("/_dashboard")({
   component: dashboardLayoutRoute,
 });
 
 function dashboardLayoutRoute() {
   return (
-    <DashboardLayout
-      title="Dashboard"
-      breadcrumb="Home / Dashboard"
-    />
+    <AuthGuard>
+      <DashboardLayout title="Dashboard" breadcrumb="Home / Dashboard" />
+    </AuthGuard>
   );
 }
