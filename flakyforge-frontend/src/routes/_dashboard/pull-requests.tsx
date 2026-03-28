@@ -7,6 +7,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { Card } from "../../components/Card";
+import { AuthGuard } from "../../components/guards/AuthGuard";
 
 const pullRequests = [
   {
@@ -201,135 +202,137 @@ function pullRequestPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {prStatistics.map((pr) => (
-          <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-            <div className="text-[#94A3B8] text-[13px] mb-2">{pr.title}</div>
-            <div className="text-white text-[32px] font-bold">{pr.value}</div>
-          </Card>
-        ))}
-      </div>
+    <AuthGuard>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {prStatistics.map((pr) => (
+            <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+              <div className="text-[#94A3B8] text-[13px] mb-2">{pr.title}</div>
+              <div className="text-white text-[32px] font-bold">{pr.value}</div>
+            </Card>
+          ))}
+        </div>
 
-      <div className="flex items-center gap-2">
-        <button className="h-9 px-4 bg-[#6C63FF] text-white rounded-lg text-[13px] font-medium">
-          All PRs
-        </button>
-        <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
-          Open
-        </button>
-        <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
-          Merged
-        </button>
-        <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
-          Closed
-        </button>
-      </div>
+        <div className="flex items-center gap-2">
+          <button className="h-9 px-4 bg-[#6C63FF] text-white rounded-lg text-[13px] font-medium">
+            All PRs
+          </button>
+          <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+            Open
+          </button>
+          <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+            Merged
+          </button>
+          <button className="h-9 px-4 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+            Closed
+          </button>
+        </div>
 
-      <div className="space-y-3">
-        {pullRequests.map((pr) => (
-          <Card
-            key={pr.id}
-            className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6 hover:border-[#6C63FF]/50 transition-colors"
-          >
-            <div className="flex items-start gap-4">
-              <div
-                className={`w-10 h-10 rounded-lg flex items-center justify-center ${getStatusBadgeColors(pr.statusColor)}`}
-              >
-                {getStatusIcon(pr.status)}
-              </div>
+        <div className="space-y-3">
+          {pullRequests.map((pr) => (
+            <Card
+              key={pr.id}
+              className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6 hover:border-[#6C63FF]/50 transition-colors"
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center ${getStatusBadgeColors(pr.statusColor)}`}
+                >
+                  {getStatusIcon(pr.status)}
+                </div>
 
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="text-white text-[15px] font-semibold mb-1">
-                      {pr.title}
-                    </h3>
-                    <div className="flex items-center gap-3 text-[#94A3B8] text-[13px]">
-                      <span>{pr.repository}</span>
-                      <span>•</span>
-                      <span>#{pr.id}</span>
-                      <span>•</span>
-                      <span>Created {pr.createdAt}</span>
-                      <span>•</span>
-                      <span className="px-2 py-0.5 bg-[#0F1117] rounded text-[11px]">
-                        {pr.branch}
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="text-white text-[15px] font-semibold mb-1">
+                        {pr.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-[#94A3B8] text-[13px]">
+                        <span>{pr.repository}</span>
+                        <span>•</span>
+                        <span>#{pr.id}</span>
+                        <span>•</span>
+                        <span>Created {pr.createdAt}</span>
+                        <span>•</span>
+                        <span className="px-2 py-0.5 bg-[#0F1117] rounded text-[11px]">
+                          {pr.branch}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] capitalize ${getStatusBadgeColors(pr.statusColor)}`}
+                    >
+                      {getStatusIcon(pr.status)}
+                      {pr.status}
+                    </span>
+                  </div>
+
+                  <p className="text-[#94A3B8] text-[13px] mb-3">
+                    {pr.description}
+                  </p>
+
+                  <div className="flex items-center gap-6 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#6C63FF]"></div>
+                      <span className="text-[#94A3B8] text-[12px]">
+                        Root Cause: {pr.cause}
                       </span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#22C55E] text-[12px]">
+                        +{pr.additions}
+                      </span>
+                      <span className="text-[#EF4444] text-[12px]">
+                        -{pr.deletions}
+                      </span>
+                    </div>
+                    <div className="text-[#94A3B8] text-[12px]">
+                      {pr.comments} comments
+                    </div>
+                    <div className="text-[#94A3B8] text-[12px]">
+                      {pr.reviews} reviews
+                    </div>
                   </div>
-                  <span
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] capitalize ${getStatusBadgeColors(pr.statusColor)}`}
-                  >
-                    {getStatusIcon(pr.status)}
-                    {pr.status}
-                  </span>
-                </div>
 
-                <p className="text-[#94A3B8] text-[13px] mb-3">
-                  {pr.description}
-                </p>
-
-                <div className="flex items-center gap-6 mb-4">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#6C63FF]"></div>
-                    <span className="text-[#94A3B8] text-[12px]">
-                      Root Cause: {pr.cause}
-                    </span>
+                    <button className="h-8 px-4 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium flex items-center gap-2">
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      View on GitHub
+                    </button>
+                    <button className="h-8 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+                      View Test
+                    </button>
+                    <button className="h-8 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+                      View Diff
+                    </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#22C55E] text-[12px]">
-                      +{pr.additions}
-                    </span>
-                    <span className="text-[#EF4444] text-[12px]">
-                      -{pr.deletions}
-                    </span>
-                  </div>
-                  <div className="text-[#94A3B8] text-[12px]">
-                    {pr.comments} comments
-                  </div>
-                  <div className="text-[#94A3B8] text-[12px]">
-                    {pr.reviews} reviews
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button className="h-8 px-4 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium flex items-center gap-2">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    View on GitHub
-                  </button>
-                  <button className="h-8 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
-                    View Test
-                  </button>
-                  <button className="h-8 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
-                    View Diff
-                  </button>
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-[#94A3B8] text-[13px]">
-          Showing {pullRequests.length} of 142 pull requests
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            Previous
-          </button>
-          <button className="h-8 w-8 bg-[#6C63FF] text-white rounded-lg text-[13px]">
-            1
-          </button>
-          <button className="h-8 w-8 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            2
-          </button>
-          <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            Next
-          </button>
+        {/* Pagination */}
+        <div className="flex items-center justify-between">
+          <div className="text-[#94A3B8] text-[13px]">
+            Showing {pullRequests.length} of 142 pull requests
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              Previous
+            </button>
+            <button className="h-8 w-8 bg-[#6C63FF] text-white rounded-lg text-[13px]">
+              1
+            </button>
+            <button className="h-8 w-8 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              2
+            </button>
+            <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              Next
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }
