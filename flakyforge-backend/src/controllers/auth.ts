@@ -99,8 +99,9 @@ export const AuthController = {
       res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
 
       const frontendUrl = env.FRONTEND_URL;
-
-      res.redirect(`${frontendUrl}/auth/github/callback?token=${accessToken}`);
+      res.redirect(
+        `${frontendUrl}/auth/github/callback?token=${accessToken}&name=${encodeURIComponent(user.fullName)}&email=${encodeURIComponent(user.email)}&role=${encodeURIComponent(user.role)}`,
+      );
     } catch (error) {
       const frontendUrl = env.FRONTEND_URL;
 
