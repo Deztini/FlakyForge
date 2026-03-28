@@ -14,6 +14,7 @@ import {
   Cell,
 } from "recharts";
 import { Card } from "../../components/Card";
+import { AuthGuard } from "../../components/guards/AuthGuard";
 
 const lineChartData = [
   { day: "Mon", detected: 12, fixed: 8 },
@@ -145,7 +146,7 @@ function dashboardPage() {
   };
 
   return (
-    <>
+    <AuthGuard>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {testStatistics.map((ts) => (
           <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
@@ -160,7 +161,6 @@ function dashboardPage() {
           </Card>
         ))}
       </div>
-
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <Card className="lg:col-span-2 bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6">
@@ -203,7 +203,6 @@ function dashboardPage() {
           </ResponsiveContainer>
         </Card>
 
-   
         <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6">
           <h3 className="text-white text-[16px] font-semibold mb-4">
             Root Cause Breakdown
@@ -257,10 +256,8 @@ function dashboardPage() {
           </div>
         </Card>
       </div>
-  
 
       <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
-        
         <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
           <div>
             <h3 className="text-white text-[16px] font-semibold">
@@ -374,6 +371,6 @@ function dashboardPage() {
           </div>
         </div>
       </div>
-    </>
+    </AuthGuard>
   );
 }

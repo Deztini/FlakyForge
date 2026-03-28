@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Filter, Download, TrendingUp } from "lucide-react";
+import { AuthGuard } from "../../components/guards/AuthGuard";
 
 const flakyTests = [
   {
@@ -205,180 +206,180 @@ function flakyTestPage() {
   };
 
   return (
-    <div className="space-y-6">
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">
-            Total Flaky Tests
+    <AuthGuard>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">
+              Total Flaky Tests
+            </div>
+            <div className="text-white text-[32px] font-bold mb-1">47</div>
+            <div className="flex items-center gap-1 text-[#EF4444] text-[12px]">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+3 new today</span>
+            </div>
           </div>
-          <div className="text-white text-[32px] font-bold mb-1">47</div>
-          <div className="flex items-center gap-1 text-[#EF4444] text-[12px]">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>+3 new today</span>
+
+          <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">Fixed Tests</div>
+            <div className="text-white text-[32px] font-bold mb-1">31</div>
+            <div className="text-[#22C55E] text-[12px]">66% fix rate</div>
+          </div>
+
+          <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">Pending Fixes</div>
+            <div className="text-white text-[32px] font-bold mb-1">4</div>
+            <div className="text-[#F59E0B] text-[12px]">In progress</div>
+          </div>
+
+          <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
+            <div className="text-[#94A3B8] text-[13px] mb-2">Unfixed Tests</div>
+            <div className="text-white text-[32px] font-bold mb-1">12</div>
+            <div className="text-[#EF4444] text-[12px]">Needs attention</div>
           </div>
         </div>
 
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Fixed Tests</div>
-          <div className="text-white text-[32px] font-bold mb-1">31</div>
-          <div className="text-[#22C55E] text-[12px]">66% fix rate</div>
-        </div>
-
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Pending Fixes</div>
-          <div className="text-white text-[32px] font-bold mb-1">4</div>
-          <div className="text-[#F59E0B] text-[12px]">In progress</div>
-        </div>
-
-        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5">
-          <div className="text-[#94A3B8] text-[13px] mb-2">Unfixed Tests</div>
-          <div className="text-white text-[32px] font-bold mb-1">12</div>
-          <div className="text-[#EF4444] text-[12px]">Needs attention</div>
-        </div>
-      </div>
-
-     
-      <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
-        <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
-          <div>
-            <h3 className="text-white text-[16px] font-semibold">
-              All Flaky Tests
-            </h3>
-            <p className="text-[#94A3B8] text-[13px]">
-              Complete list of detected flaky tests across all repositories
-            </p>
+        <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
+          <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
+            <div>
+              <h3 className="text-white text-[16px] font-semibold">
+                All Flaky Tests
+              </h3>
+              <p className="text-[#94A3B8] text-[13px]">
+                Complete list of detected flaky tests across all repositories
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="h-9 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                Filter
+              </button>
+              <button className="h-9 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="h-9 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium flex items-center gap-2">
-              <Filter className="w-4 h-4" />
-              Filter
+
+          <div className="px-6 py-4 border-b border-[#1E2139] flex items-center gap-2">
+            <button className="h-7 px-3.5 bg-[#6C63FF] text-white rounded-full text-[13px]">
+              All ({flakyTests.length})
             </button>
-            <button className="h-9 px-4 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export
+            <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              Unfixed (12)
+            </button>
+            <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              Pending (4)
+            </button>
+            <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+              Fixed (31)
             </button>
           </div>
-        </div>
 
-        <div className="px-6 py-4 border-b border-[#1E2139] flex items-center gap-2">
-          <button className="h-7 px-3.5 bg-[#6C63FF] text-white rounded-full text-[13px]">
-            All ({flakyTests.length})
-          </button>
-          <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            Unfixed (12)
-          </button>
-          <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            Pending (4)
-          </button>
-          <button className="h-7 px-3.5 bg-[#0F1117] border border-[#2D3148] text-[#94A3B8] rounded-full text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-            Fixed (31)
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#0F1117]">
-              <tr>
-                <th className="text-left text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Test Name
-                </th>
-                <th className="text-left text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Repository
-                </th>
-                <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Root Cause
-                </th>
-                <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Confidence
-                </th>
-                <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Attempts
-                </th>
-                <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Detected
-                </th>
-                <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Status
-                </th>
-                <th className="text-right text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {flakyTests.map((test, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-[#1E2139] hover:bg-[#1E2139] transition-colors"
-                >
-                  <td className="px-4 py-3.5">
-                    <div className="text-white text-[14px]">
-                      {test.testName}
-                    </div>
-                    <div className="text-[#94A3B8] text-[12px]">
-                      {test.fileName}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5 text-[#94A3B8] text-[13px]">
-                    {test.repository}
-                  </td>
-                  <td className="px-4 py-3.5 text-center">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[12px] ${getCauseBadgeColors(test.causeColor)}`}
-                    >
-                      {test.cause}
-                    </span>
-                  </td>
-                  <td
-                    className={`px-4 py-3.5 text-center text-[14px] font-semibold ${getConfidenceColor(test.confidenceColor)}`}
-                  >
-                    {test.confidence}
-                  </td>
-                  <td className="px-4 py-3.5 text-center text-[#94A3B8] text-[13px]">
-                    {test.attempts}
-                  </td>
-                  <td className="px-4 py-3.5 text-center text-[#94A3B8] text-[13px]">
-                    {test.detectedDate}
-                  </td>
-                  <td className="px-4 py-3.5 text-center">
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-full text-[12px] ${getStatusBadgeColors(test.statusColor)}`}
-                    >
-                      {test.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 text-right">
-                    {test.status === "Fixed" ? (
-                      <button className="text-[#94A3B8] hover:text-white text-[13px] transition-colors">
-                        View PR
-                      </button>
-                    ) : (
-                      <button className="text-[#6C63FF] hover:text-[#5B52E8] text-[13px] font-medium transition-colors">
-                        Apply Fix
-                      </button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#0F1117]">
+                <tr>
+                  <th className="text-left text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Test Name
+                  </th>
+                  <th className="text-left text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Repository
+                  </th>
+                  <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Root Cause
+                  </th>
+                  <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Confidence
+                  </th>
+                  <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Attempts
+                  </th>
+                  <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Detected
+                  </th>
+                  <th className="text-center text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Status
+                  </th>
+                  <th className="text-right text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5">
+                    Action
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="p-4 flex items-center justify-between border-t border-[#1E2139]">
-          <div className="text-[#94A3B8] text-[13px]">
-            Showing {flakyTests.length} of {flakyTests.length} flaky tests
+              </thead>
+              <tbody>
+                {flakyTests.map((test, index) => (
+                  <tr
+                    key={index}
+                    className="border-b border-[#1E2139] hover:bg-[#1E2139] transition-colors"
+                  >
+                    <td className="px-4 py-3.5">
+                      <div className="text-white text-[14px]">
+                        {test.testName}
+                      </div>
+                      <div className="text-[#94A3B8] text-[12px]">
+                        {test.fileName}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-[#94A3B8] text-[13px]">
+                      {test.repository}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-[12px] ${getCauseBadgeColors(test.causeColor)}`}
+                      >
+                        {test.cause}
+                      </span>
+                    </td>
+                    <td
+                      className={`px-4 py-3.5 text-center text-[14px] font-semibold ${getConfidenceColor(test.confidenceColor)}`}
+                    >
+                      {test.confidence}
+                    </td>
+                    <td className="px-4 py-3.5 text-center text-[#94A3B8] text-[13px]">
+                      {test.attempts}
+                    </td>
+                    <td className="px-4 py-3.5 text-center text-[#94A3B8] text-[13px]">
+                      {test.detectedDate}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span
+                        className={`inline-block px-2.5 py-0.5 rounded-full text-[12px] ${getStatusBadgeColors(test.statusColor)}`}
+                      >
+                        {test.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      {test.status === "Fixed" ? (
+                        <button className="text-[#94A3B8] hover:text-white text-[13px] transition-colors">
+                          View PR
+                        </button>
+                      ) : (
+                        <button className="text-[#6C63FF] hover:text-[#5B52E8] text-[13px] font-medium transition-colors">
+                          Apply Fix
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-              Previous
-            </button>
-            <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
-              Next
-            </button>
+
+          <div className="p-4 flex items-center justify-between border-t border-[#1E2139]">
+            <div className="text-[#94A3B8] text-[13px]">
+              Showing {flakyTests.length} of {flakyTests.length} flaky tests
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+                Previous
+              </button>
+              <button className="h-8 px-3 border border-[#2D3148] text-[#94A3B8] rounded-lg text-[13px] hover:border-[#6C63FF] hover:text-white transition-colors">
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }
