@@ -9,6 +9,7 @@ export interface IUser extends Document {
   createdAt: Date;
   updatedAt: Date;
   provider: string;
+  githubAccessToken?: string;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -20,6 +21,7 @@ const UserSchema = new Schema<IUser>(
       enum: ["local", "github"],
       default: "local",
     },
+    githubAccessToken: { type: String },
     password: {
       type: String,
       required: function () {

@@ -33,8 +33,6 @@ passport.use(
 
           email = primaryEmail?.email;
         }
-        
-        console.log(email);
 
         if (!email) {
           return done(new Error("GitHub email not available"), undefined);
@@ -49,7 +47,12 @@ passport.use(
             password: "",
             isVerified: true,
             provider: "github",
+            githubAccessToken: accessToken,
           });
+        } else {
+          user.githubAccessToken = accessToken;
+
+          await user.save();
         }
 
         return done(null, user);
