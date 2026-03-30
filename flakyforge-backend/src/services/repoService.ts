@@ -120,4 +120,27 @@ export const RepoService = {
 
     return repository;
   },
+
+  async getUserRepos(userId: string) {
+    return Repository.find({ userId }).sort({ createdAt: -1 });
+  },
+
+  async updateScanCounts(
+    repoId: string,
+    flakyCount: number,
+    fixedCount: number,
+  ) {
+    return Repository.findByIdAndUpdate(
+      repoId,
+      {
+        $set: {
+          flakyCount,
+          fixedCount,
+          lastScannedAt: new Date(),
+          status: "active",
+        },
+      },
+      { new: true },
+    );
+  },
 };
