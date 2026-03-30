@@ -20,4 +20,6 @@ export const env = {
 
   FRONTEND_URL: process.env.FRONTEND_URL!,
   BACKEND_URL: process.env.BACKEND_URL!,
+
+  WEBHOOK_SECRET: process.env.WEBHOOK_SECRET!
 }
