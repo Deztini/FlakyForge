@@ -3,6 +3,7 @@ import { IUser } from "../models/User";
 import { ApiError } from "../utils/ApiError";
 import { Repository } from "../models/Repository";
 import { env } from "../config/env";
+import { injectWorkflowFiles } from "../utils/injectWorflowFiles";
 
 interface GitHubRepo {
   id: number;
@@ -103,6 +104,13 @@ export const RepoService = {
         throw ApiError.badRequest("Failed to install GitHub webhook");
       }
     }
+
+    await injectWorkflowFiles(
+      owner,
+      repo,
+      payload.branch,
+      user.githubAccessToken,
+    );
 
     const repository = await Repository.create({
       userId: user._id,
