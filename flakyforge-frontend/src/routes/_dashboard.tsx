@@ -23,11 +23,10 @@ function DashboardLayoutRoute() {
   } else if (currentPathName === "/pull-requests") {
     pageTitle = "Pull Requests";
     breadcrumb = "Home / Pull Requests";
-  }  else if (currentPathName === "/test-runs") {
+  } else if (currentPathName === "/test-runs") {
     pageTitle = "Test Runs";
     breadcrumb = "Home / Flaky Tests";
-  } 
-  else if (currentPathName === "/settings") {
+  } else if (currentPathName === "/settings") {
     pageTitle = "Settings";
     breadcrumb = "Home / Settings";
   }
