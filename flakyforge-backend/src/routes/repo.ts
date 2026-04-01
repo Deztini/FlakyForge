@@ -6,8 +6,8 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/available", RepoController.getAvailable);
-router.get("/", RepoController.getUserRepos);
-router.post("/connect", RepoController.connect);
+router.get("/available", RepoController.getAvailable); // list available repos
+router.get("/", RepoController.getUserRepos); // list all user repo
+router.post("/connect", RepoController.connect); // connects repo and injects Workflow
 
 export default router;

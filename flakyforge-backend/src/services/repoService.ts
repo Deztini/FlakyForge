@@ -59,6 +59,7 @@ export const RepoService = {
       autoFixPRs: boolean;
     },
   ) {
+    console.log(payload.repoFullName);
     if (!user.githubAccessToken) {
       throw ApiError.badRequest(
         "No Github token found. Please logout and sign in with Github again",
@@ -88,7 +89,7 @@ export const RepoService = {
           active: true,
           events: webhookEvents,
           config: {
-            url: `${env.BACKEND_URL}//webhooks/github`,
+            url: `${env.NGROK_URL}/webhooks/github`,
             content_type: "json",
             secret: env.WEBHOOK_SECRET,
           },
@@ -97,7 +98,6 @@ export const RepoService = {
           headers: { Authorization: `Bearer ${user.githubAccessToken}` },
         },
       );
-
       webhookId = webhookRes.data.id;
     } catch (err: any) {
       if (err.response?.status !== 422) {

@@ -15,15 +15,18 @@ router.post("/login", AuthController.login);
 router.get(
   "/github",
   passport.authenticate("github", {
-    scope: ["user:email"],
+    scope: ["user:email", "repo", "admin:repo_hook", "workflow"],
     session: false,
   }),
 );
 
 router.get(
   "/github/callback",
-  passport.authenticate("github", { session: false, failureRedirect: `${process.env.FRONTEND_URL}/auth/github/callback?error=github_auth_failed`  }),
-  AuthController.githubCallback
+  passport.authenticate("github", {
+    session: false,
+    failureRedirect: `${process.env.FRONTEND_URL}/auth/github/callback?error=github_auth_failed`,
+  }),
+  AuthController.githubCallback,
 );
 
 router.post("/refresh", AuthController.refresh);
