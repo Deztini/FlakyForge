@@ -1,4 +1,4 @@
-name: FlakeSense Runner
+name: FlakeyRadar Runner
 
 on:
   push:
@@ -18,8 +18,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run FlakeSense
-        run: node scripts/flakesense-runner.js
+      - name: Run FlakeyRadar
+        run: node scripts/flakeyradar-runner.js
 
       - name: Send results
         run: |

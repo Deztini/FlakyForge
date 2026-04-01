@@ -14,7 +14,7 @@ async function main() {
     default: "default-results.json"
   };
 
-  console.log("FlakyForge started...");
+  console.log("FlakeyRadar started...");
 
   const framework = detectFramework();
   console.log("Detected Framework: ", framework);
