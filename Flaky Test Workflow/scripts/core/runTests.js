@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { execCommand } = require("../utils/exec");
 
 function getTestScript() {
