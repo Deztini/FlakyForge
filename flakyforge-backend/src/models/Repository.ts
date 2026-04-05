@@ -14,6 +14,7 @@ export interface IRepository extends Document {
   flakyCount: number;
   fixedCount: number;
   lastScannedAt?: Date;
+  apiKey: string;
 }
 
 const RepositorySchema = new Schema<IRepository>(
@@ -39,6 +40,11 @@ const RepositorySchema = new Schema<IRepository>(
     flakyCount: { type: Number, default: 0 },
     fixedCount: { type: Number, default: 0 },
     lastScannedAt: { type: Date },
+    apiKey: {
+      type: String,
+      required: true,
+      unique: true
+    }
   },
   { timestamps: true },
 );
