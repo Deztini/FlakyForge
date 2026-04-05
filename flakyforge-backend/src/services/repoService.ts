@@ -1,4 +1,5 @@
 import axios from "axios";
+import crypto from "crypto";
 import { IUser } from "../models/User";
 import { ApiError } from "../utils/ApiError";
 import { Repository } from "../models/Repository";
@@ -14,6 +15,8 @@ interface GitHubRepo {
   default_branch: string;
   description: string | null;
 }
+
+const apiKey = crypto.randomBytes(32).toString("hex");
 
 export const RepoService = {
   async getAvailableRepos(user: IUser) {
@@ -110,6 +113,8 @@ export const RepoService = {
       repo,
       payload.branch,
       user.githubAccessToken,
+      apiKey,
+      env.BACKEND_URL
     );
 
     const repository = await Repository.create({
