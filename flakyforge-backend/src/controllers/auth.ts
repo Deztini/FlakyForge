@@ -18,6 +18,13 @@ const COOKIE_OPTIONS = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+const ACCESS_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  maxAge: 15 * 60 * 1000,
+};
+
 export const AuthController = {
   async signup(req: Request, res: Response, next: NextFunction) {
     try {
@@ -62,10 +69,10 @@ export const AuthController = {
       const result = await AuthService.login(input);
 
       res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
+      res.cookie("accessToken", result.accessToken, ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({
+      res.status(201).json({
         message: result.message,
-        accessToken: result.accessToken,
         user: result.user,
       });
     } catch (error) {
@@ -76,8 +83,6 @@ export const AuthController = {
   async githubCallback(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user as any;
-
-      console.log(user);
 
       if (!user) {
         return res.redirect(
@@ -97,10 +102,11 @@ export const AuthController = {
       });
 
       res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
+      res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
 
       const frontendUrl = env.FRONTEND_URL;
       res.redirect(
-        `${frontendUrl}/auth/github/callback?token=${accessToken}&name=${encodeURIComponent(user.fullName)}&email=${encodeURIComponent(user.email)}&role=${encodeURIComponent(user.role)}`,
+        `${frontendUrl}/auth/github/callback?name=${encodeURIComponent(user.fullName)}&email=${encodeURIComponent(user.email)}&role=${encodeURIComponent(user.role)}`,
       );
     } catch (error) {
       const frontendUrl = env.FRONTEND_URL;
@@ -120,8 +126,9 @@ export const AuthController = {
         await AuthService.refresh(token);
 
       res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
+      res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({ accessToken, user });
+      res.status(200).json({ user });
     } catch (err) {
       next(err);
     }
@@ -134,6 +141,7 @@ export const AuthController = {
       if (token) await AuthService.logout(token);
 
       res.clearCookie("refreshToken", COOKIE_OPTIONS);
+      res.clearCookie("accessToken", ACCESS_COOKIE_OPTIONS);
 
       res.status(200).json({ message: "Logged out successfully" });
     } catch (err) {

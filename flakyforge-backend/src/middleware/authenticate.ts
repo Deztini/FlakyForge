@@ -9,24 +9,31 @@ export async function authenticate(
   next: NextFunction,
 ) {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies?.accessToken;
 
-    if (!authHeader || !authHeader.startsWith("Bearer")) {
+    if (!token) {
       throw ApiError.unauthorized("No token provided");
     }
 
-    const token = authHeader.split(" ")[1];
-
-    const payload = verifyAccessToken(token);
+    const payload = verifyAccessToken(token) as {
+      userId: string;
+      email: string;
+    };
 
     const user = await User.findById(payload.userId).select("-password");
 
-    if (!user) throw ApiError.unauthorized("User not found");
+    if (!user) {
+      throw ApiError.unauthorized("User not found");
+    }
 
     req.user = user;
 
     next();
-  } catch {
-    next(ApiError.unauthorized("Invalid or expired token"));
+  } catch (error) {
+    next(
+      error instanceof ApiError
+        ? error
+        : ApiError.unauthorized("Invalid or expired token"),
+    );
   }
 }
