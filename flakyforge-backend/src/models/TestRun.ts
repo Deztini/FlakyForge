@@ -12,7 +12,7 @@ export interface ITestRun extends Document {
   userId: mongoose.Types.ObjectId;
   githubRepoId: number;
   status: "pending" | "running" | "completed" | "failed";
-  triggeredBy: "manual" | "push" | "pull_request" | "scheduled";
+  triggeredBy: "workflow_dispatch" | "push" | "pull_request" | "scheduled";
   flakyTests: IFlakyResult[];
   flakyCount: number;
   totalRuns: number;
@@ -49,7 +49,7 @@ const TestRunSchema = new Schema<ITestRun>(
     triggeredBy: {
       type: String,
       enum: ["push", "pull_request", "scheduled", "workflow_dispatch"],
-      default: "manual",
+      default: "workflow_dispatch",
     },
     flakyTests: [FlakyResultSchema],
     flakyCount: { type: Number, default: 0 },

@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError";
 import { Repository } from "../models/Repository";
 import { env } from "../config/env";
 import { injectWorkflowFiles } from "../utils/injectWorflowFiles";
+import { TestRun } from "../models/TestRun";
 
 interface GitHubRepo {
   id: number;
@@ -15,8 +16,6 @@ interface GitHubRepo {
   default_branch: string;
   description: string | null;
 }
-
-const apiKey = crypto.randomBytes(32).toString("hex");
 
 export const RepoService = {
   async getAvailableRepos(user: IUser) {
@@ -108,13 +107,15 @@ export const RepoService = {
       }
     }
 
+    const apiKey = crypto.randomBytes(32).toString("hex");
+
     await injectWorkflowFiles(
       owner,
       repo,
       payload.branch,
       user.githubAccessToken,
       apiKey,
-      env.BACKEND_URL
+      env.BACKEND_URL,
     );
 
     const repository = await Repository.create({
@@ -129,6 +130,7 @@ export const RepoService = {
       webhookId,
       flakyCount: 0,
       fixedCount: 0,
+      apiKey,
     });
 
     return repository;
@@ -137,6 +139,45 @@ export const RepoService = {
   async getUserRepos(userId: string) {
     return Repository.find({ userId }).sort({ createdAt: -1 });
   },
+
+  async triggerScan(repoId: string, user: IUser) {
+    if (!user.githubAccessToken) {
+      throw ApiError.badRequest(
+        "No Github token found. Please logout and sign in with Github again",
+      );
+    }
+
+    const repository = await Repository.findOne({
+      _id: repoId,
+      userId: user._id,
+    });
+
+    if (!repository) throw ApiError.notFound("No repository found");
+
+    const [owner, repo] = repository.fullName.split("/");
+
+    await axios.post(
+      `https://api.github.com/repos/${owner}/${repo}/actions/workflows/flakeyradar.yml/dispatches`,
+      {
+        ref: repository.branch,
+      },
+      { headers: { Authorization: `Bearer ${user.githubAccessToken}` } },
+    );
+
+    const testRun = await TestRun.create({
+      repositoryId: repository._id,
+      userId: user._id,
+      githubRepoId: repository.githubRepoId,
+      status: "pending",
+      triggeredBy: "workflow_dispatch",
+      startedAt: new Date(),
+    });
+
+    await Repository.findByIdAndUpdate(repoId, { status: "scanning" });
+
+    return testRun;
+  },
+
 
   async updateScanCounts(
     repoId: string,
