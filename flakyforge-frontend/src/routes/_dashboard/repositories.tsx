@@ -11,10 +11,11 @@ import {
 import { Card } from "../../components/Card";
 import { AuthGuard } from "../../components/guards/AuthGuard";
 import { ConnectRepoModal } from "../../components/sections/ConnectRepoModal";
-import { useConnectedRepos } from "../../hooks/useRepos";
+import { useConnectedRepos, useTriggerScan } from "../../hooks/useRepos";
 import type { ConnectedRepo } from "../../api/repoApi";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "../../components/Button";
+import { RepoDetailsModal } from "../../components/sections/RepoDetailsModal";
 
 export const Route = createFileRoute("/_dashboard/repositories")({
   component: RepositoryPage,
@@ -70,7 +71,11 @@ function EmptyState({ onConnect }: { onConnect: () => void }) {
 
 function RepositoryPage() {
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [selectedRepo, setSelectedRepo] = useState<ConnectedRepo | null>(null);
   const { data: repos, isLoading, isError } = useConnectedRepos();
+
+  const triggerScan = useTriggerScan();
 
   const totalFlaky = repos?.reduce((sum, r) => sum + r.flakyCount, 0) ?? 0;
   const totalFixed = repos?.reduce((sum, r) => sum + r.fixedCount, 0) ?? 0;
@@ -203,12 +208,25 @@ function RepositoryPage() {
 
                 <div className="flex items-center gap-2">
                   <Button
-                    disabled={repo.status === "scanning"}
-                    className="flex-1 h-9 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={
+                      repo.status === "scanning" || triggerScan.isPending
+                    }
+                    onClick={() => triggerScan.mutate(repo._id)}
+                    className="flex-1 h-9 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Run Scan
+                    {triggerScan.isPending ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Triggering...
+                      </>
+                    ) : (
+                      "Run Scan"
+                    )}
                   </Button>
-                  <Button className="flex-1 h-9 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium">
+                  <Button
+                    onClick={() => setSelectedRepo(repo)}
+                    className="flex-1 h-9 border border-[#2D3148] text-[#94A3B8] rounded-lg hover:border-[#6C63FF] hover:text-white transition-colors text-[13px] font-medium"
+                  >
                     View Details
                   </Button>
                 </div>
@@ -221,6 +239,11 @@ function RepositoryPage() {
       <ConnectRepoModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+      />
+
+      <RepoDetailsModal
+        repo={selectedRepo}
+        onClose={() => setSelectedRepo(null)}
       />
     </AuthGuard>
   );
