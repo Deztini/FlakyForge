@@ -39,17 +39,22 @@ export interface ConnectRepoPayload {
 
 export const repoApi = {
   async getAvailable(): Promise<AvailableRepo[]> {
-    const { data } = await api.get(`${BASE_URL}/api/repo/available`);
+    const { data } = await api.get(`${BASE_URL}/repo/available`);
     return data;
   },
 
   async getConnected(): Promise<ConnectedRepo[]> {
-    const { data } = await api.get(`${BASE_URL}/api/repo`);
+    const { data } = await api.get(`${BASE_URL}/repo`);
     return data;
   },
 
   async connect(payload: ConnectRepoPayload): Promise<ConnectedRepo> {
-    const { data } = await api.post(`${BASE_URL}/api/repo/connect`, payload);
+    const { data } = await api.post(`${BASE_URL}/repo/connect`, payload);
+    return data;
+  },
+
+  async triggerScan(repoId: string): Promise<void> {
+    const { data } = await api.post(`${BASE_URL}/test-runs/${repoId}/trigger`);
     return data;
   },
 };

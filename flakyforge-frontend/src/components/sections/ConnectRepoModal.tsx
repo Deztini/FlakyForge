@@ -48,10 +48,11 @@ export function ConnectRepoModal({ isOpen, onClose }: Props) {
 
   const handleConnect = () => {
     if (!selected) return;
+    console.log(selected);
     connectRepo(
       {
         repoFullName: selected.fullName,
-        githubRepoId: selected.githubRepoId,
+        githubRepoId: selected.id,
         language: selected.language,
         stars: selected.stars,
         branch: config.branch,

@@ -33,8 +33,7 @@ export const useConnectRepo = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: ConnectRepoPayload) =>
-      repoApi.connect(payload),
+    mutationFn: (payload: ConnectRepoPayload) => repoApi.connect(payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -47,13 +46,25 @@ export const useConnectRepo = () => {
     },
 
     onError: (error) => {
-      console.error(
-        "[connect-repo error]",
-        getErrorMessage(error)
-      );
+      console.error("[connect-repo error]", getErrorMessage(error));
     },
   });
 };
 
+export const useTriggerScan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (repoId: string) => repoApi.triggerScan(repoId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["repos", "connected"] });
+    },
+
+    onError: (error) => {
+      console.error("[trigger-scan error]", getErrorMessage(error));
+    },
+  });
+};
 
 export { getErrorMessage };
