@@ -43,7 +43,8 @@ const RepositorySchema = new Schema<IRepository>(
     apiKey: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      select: false
     }
   },
   { timestamps: true },

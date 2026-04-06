@@ -7,7 +7,7 @@ const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/repo", repoRoutes);
-router.use("/test-run", testRunRoutes);
+router.use("/test-runs", testRunRoutes);
 
 
 export default router;
