@@ -9,6 +9,8 @@ jobs:
   detect-flaky:
     runs-on: ubuntu-latest
 
+    if: "!contains(github.event.head_commit.message, '[skip-flakeyradar]')"
+
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -23,7 +25,17 @@ jobs:
 
       - name: Send results
         run: |
-          curl -X POST https://your-api.com/test-run \
-          -H "Authorization: Bearer ${{ secrets.FLAKEFORGE_API_KEY }}" \
+          node -e "
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('flaky-results.json', 'utf-8'));
+            const payload = {
+              githubRepoId: parseInt('${{ github.repository_id }}'),
+              repoFullName: '${{ github.repository }}',
+              results
+            };
+            fs.writeFileSync('flaky-results.json', JSON.stringify(payload));
+          "
+          curl -X POST ${{ secrets.FLAKEYRADAR_API_URL }}/api/test-runs/results \
+          -H "x-api-key: ${{ secrets.FLAKEYRADAR_API_KEY }}" \
           -H "Content-Type: application/json" \
           -d @flaky-results.json
