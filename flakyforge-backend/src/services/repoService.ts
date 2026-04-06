@@ -178,6 +178,62 @@ export const RepoService = {
     return testRun;
   },
 
+  async collectResults(
+    apiKey: string,
+    payload: {
+      githubRepoId: number;
+      repoFullName: string;
+      results: {
+        name: string;
+        failRate: number;
+        runs: number;
+        isFlaky: boolean;
+      }[];
+    },
+  ) {
+    const repository = await Repository.findOne({ apiKey });
+
+    if (!repository) throw ApiError.unauthorized("Invalid API key");
+
+    if (repository.githubRepoId !== payload.githubRepoId) {
+      throw ApiError.badRequest("Repo ID mismatch");
+    }
+
+    const flakyTests = payload.results.filter((t) => t.isFlaky);
+    const flakyCount = flakyTests.length;
+
+    const totalRuns = payload.results.reduce((sum, t) => sum + t.runs, 0);
+
+    const testRun = await TestRun.findOneAndUpdate(
+      { repositoryId: repository._id, status: "pending" },
+      {
+        $set: {
+          flakyCount,
+          totalRuns,
+          flakyTests: payload.results,
+          completedAt: new Date(),
+          status: "completed"
+        },
+      },
+      {
+        new: true,
+        sort: { startedAt: -1 },
+      },
+    );
+
+    if (!testRun)
+      throw ApiError.notFound("No pending test run found for this repo");
+
+    await Repository.findByIdAndUpdate(repository._id, {
+      $set: {
+        flakyCount,
+        lastScannedAt: new Date(),
+        status: "active",
+      },
+    });
+
+    return testRun;
+  },
 
   async updateScanCounts(
     repoId: string,
