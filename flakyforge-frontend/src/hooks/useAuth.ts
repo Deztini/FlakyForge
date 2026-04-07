@@ -62,7 +62,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      setAuth(data.user, data.accessToken);
+      setAuth(data.user);
       router.navigate({ to: "/dashboard" });
     },
     onError: (error) => {

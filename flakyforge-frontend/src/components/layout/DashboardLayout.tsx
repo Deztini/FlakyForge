@@ -12,19 +12,20 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ title, breadcrumb }: DashboardLayoutProps) {
   const { user } = useAuthStore();
+  console.log(user);
   const logoutMutation = useLogout();
 
   const errorMessage = logoutMutation.error
     ? getErrorMessage(logoutMutation.error)
     : null;
 
-  const [firstName = "", lastName = ""] = user?.fullName?.split(" ") ?? [];
+  const [lastName = "", firstName = ""] = user?.name?.split(" ") ?? [];
 
-  const fullInitials = (firstName.charAt(0) || "") + (lastName.charAt(0) || "");
+  const fullInitials = (lastName.charAt(0) || "") + (firstName.charAt(0) || "");
 
   const currentUser = {
-    name: user?.fullName,
-    role: user?.role,
+    name: user?.name ?? "",
+    role: user?.role ?? "",
     initials: fullInitials,
     onLogout: () => logoutMutation.mutate(),
   };

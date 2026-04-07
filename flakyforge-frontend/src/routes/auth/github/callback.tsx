@@ -1,50 +1,42 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuthStore } from "../../../store/authStore";
+import { api } from "../../../lib/api";
 
-
-type GithubCallbackSearch = {
-  token?: string;
-  error?: string;
-  name?: string;
-  email?: string;
-};
 
 export const Route = createFileRoute("/auth/github/callback")({
-  validateSearch: (search: Record<string, unknown>): GithubCallbackSearch => ({
-    token: search.token as string | undefined,
-    error: search.error as string | undefined,
-    name: search.name as string | undefined,
-    email: search.email as string | undefined,
-  }),
+
   component: GithubCallbackPage,
 });
 
 function GithubCallbackPage() {
-  const { token, error, name, email } = Route.useSearch();
-  console.log(token, error, name, email);
+  const { error } = Route.useSearch();
+  console.log( error);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
 
+
   useEffect(() => {
+  const completeGithubAuth = async () => {
     if (error) {
       navigate({ to: "/login", search: { error: "GitHub login failed" } });
       return;
     }
 
-    if (token && name && email) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        setAuth(
-          { id: payload.userId, email: email, fullName: name, role: "Developer" },
-          token,
-        );
-        navigate({ to: "/dashboard" });
-      } catch {
-        navigate({ to: "/login" });
-      }
+    try {
+      const { data } = await api.post("/auth/refresh");
+      console.log(data);
+
+      setAuth(data.user);
+
+      navigate({ to: "/dashboard" });
+    } catch {
+      navigate({ to: "/login" });
     }
-  }, [token, error, name, email, navigate, setAuth]);
+  };
+
+  completeGithubAuth();
+}, [error, navigate, setAuth]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] p-4">

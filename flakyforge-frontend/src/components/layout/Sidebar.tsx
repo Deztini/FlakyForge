@@ -106,6 +106,7 @@ function SidebarUser({ name, role, initials, onLogout }: SidebarUserProps) {
 }
 
 export function Sidebar({ user }: SidebarProps) {
+  console.log(user);
   return (
     <aside className="w-60 bg-[#1A1D27] border-r border-[#1E2139] flex flex-col">
       <div className="p-6">

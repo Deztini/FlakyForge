@@ -19,14 +19,13 @@ export interface VerifyOtpInput {
 
 export interface AuthUser {
   id: string;
-  fullName: string;
+  name: string;
   email: string;
   role: string;
 }
 
 export interface LoginResponse {
   message: string;
-  accessToken: string;
   user: AuthUser;
 }
 
@@ -40,7 +39,7 @@ export interface MessageResponse {
 }
 
 export interface RefreshResponse {
-  accessToken: string;
+  user: AuthUser
 }
 
 export const authApi = {

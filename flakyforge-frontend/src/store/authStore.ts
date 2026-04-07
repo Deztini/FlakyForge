@@ -4,9 +4,8 @@ import type { AuthUser } from "../api/authApi";
 
 interface AuthState {
   user: AuthUser | null;
-  accessToken: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: AuthUser, accessToken: string) => void;
+  setAuth: (user: AuthUser) => void;
   clearAuth: () => void;
 }
 
@@ -14,15 +13,14 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
       isAuthenticated: false,
 
-      setAuth: (user, accessToken) => {
-        set({ user, accessToken, isAuthenticated: true });
+      setAuth: (user) => {
+        set({ user,  isAuthenticated: true });
       },
 
       clearAuth: () => {
-        set({ user: null, accessToken: null, isAuthenticated: false });
+        set({ user: null,  isAuthenticated: false });
       },
     }),
     {
