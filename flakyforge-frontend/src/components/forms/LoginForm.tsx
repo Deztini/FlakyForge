@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "../Button";
 import { Input } from "../Input";
 import { Logo } from "../Logo";
@@ -6,23 +5,36 @@ import { Github, Lock } from "lucide-react";
 import { useLogin, useGithubLogin } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../hooks/useAuth";
 import { Link } from "@tanstack/react-router";
-
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  loginSchema,
+  type LoginFormData,
+} from "../../lib/validations/auth.schema";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const loginMutation = useLogin();
 
-    const { login: githubLogin } = useGithubLogin();
+  const { login: githubLogin } = useGithubLogin();
 
   const errorMessage = loginMutation.error
     ? getErrorMessage(loginMutation.error)
     : null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate({ email, password });
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate({ email: data.email, password: data.password });
   };
 
   const handleGithubLogin = () => {
@@ -73,14 +85,14 @@ export function LoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <div>
               <Input
                 label="Email address"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
                 placeholder="you@example.com"
+                error={errors.email?.message}
               />
             </div>
 
@@ -88,17 +100,20 @@ export function LoginForm() {
               <Input
                 label="Password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 placeholder="••••••••"
+                error={errors.password?.message}
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-lg text-white text-[15px] font-medium mt-4"
+              disabled={isSubmitting || loginMutation.isPending}
+              className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-lg text-white text-[15px] font-medium mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isSubmitting || loginMutation.isPending
+                ? "Sign in..."
+                : "Sign in"}
             </Button>
           </form>
 
