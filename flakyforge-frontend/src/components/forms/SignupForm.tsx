@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useSignup } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../hooks/useAuth";
@@ -6,14 +5,27 @@ import { Logo } from "../Logo";
 import { Input } from "../Input";
 import { Button } from "../Button";
 import { Github } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  signupSchema,
+  type SignupFormData,
+} from "../../lib/validations/auth.schema";
 
 export function SignupForm() {
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "Developer",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      role: "developer",
+    },
   });
 
   const signupMutation = useSignup();
@@ -23,15 +35,13 @@ export function SignupForm() {
     ? getErrorMessage(signupMutation.error)
     : null;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    signupMutation.mutate(form);
+  const onSubmit = (data: SignupFormData) => {
+    signupMutation.mutate({
+      email: data.email,
+      fullName: data.fullName,
+      role: data.role,
+      password: data.password,
+    });
   };
 
   const githubLogin = () => {};
@@ -60,59 +70,53 @@ export function SignupForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
               label="Full name"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
+              {...register("fullName")}
               placeholder="John Doe"
+              error={errors.fullName?.message}
             />
             <Input
               label="Email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
+              {...register("email")}
               placeholder="you@example.com"
+              error={errors.email?.message}
             />
             <div>
               <label className="text-[#94A3B8] text-sm mb-1 block">Role</label>
               <select
-                name="role"
-                value={form.role}
-                onChange={handleChange}
+                {...register("role")}
                 className="w-full h-11 bg-[#0F1117] border border-[#2D3148] rounded-lg px-4 text-white focus:border-[#6C63FF] outline-none"
               >
-                <option>Developer</option>
-                <option>QA Engineer</option>
-                <option>Team Lead</option>
-                <option>Manager</option>
+                <option value="">Select role</option>
+                <option value="developer">Developer</option>
+                <option value="qa engineer">QA Engineer</option>
+                <option value="team lead">Team Lead</option>
+                <option value="manager">Manager</option>
               </select>
             </div>
             <Input
               label="Password"
-              name="password"
               type="password"
-              value={form.password}
+              {...register("password")}
               placeholder="••••••••"
-              onChange={handleChange}
+              error={errors.password?.message}
             />
 
             <Input
               label="Confirm Password"
-              name="confirm-password"
               type="password"
-              value={form.password}
+              {...register("confirmPassword")}
               placeholder="••••••••"
-              onChange={handleChange}
+              error={errors.confirmPassword?.message}
             />
 
             <Button
-              disabled={signupMutation.isPending}
-              className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] rounded-lg text-white font-medium"
+              disabled={isSubmitting || signupMutation.isPending}
+              className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-lg text-white text-[15px] font-medium mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {signupMutation.isPending
+              {signupMutation.isPending || isSubmitting
                 ? "Creating account…"
                 : "Create account"}
             </Button>
