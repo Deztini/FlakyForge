@@ -12,6 +12,7 @@ export function SignupForm() {
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "Developer",
   });
 
@@ -23,7 +24,7 @@ export function SignupForm() {
     : null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -33,12 +34,11 @@ export function SignupForm() {
     signupMutation.mutate(form);
   };
 
-  const githubLogin = () => {}
+  const githubLogin = () => {};
 
   return (
     <div className="min-h-screen bg-[#0F1117] flex items-center justify-center p-4">
       <div className="w-full max-w-105">
-
         <div className="text-center mb-8">
           <div className="flex justify-center mb-3">
             <Logo size="md" />
@@ -61,11 +61,21 @@ export function SignupForm() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
-            <Input label="Full name" name="fullName" value={form.fullName} onChange={handleChange} />
-            <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
-            <Input label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
-
+            <Input
+              label="Full name"
+              name="fullName"
+              value={form.fullName}
+              onChange={handleChange}
+              placeholder="John Doe"
+            />
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+            />
             <div>
               <label className="text-[#94A3B8] text-sm mb-1 block">Role</label>
               <select
@@ -80,12 +90,31 @@ export function SignupForm() {
                 <option>Manager</option>
               </select>
             </div>
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              value={form.password}
+              placeholder="••••••••"
+              onChange={handleChange}
+            />
+
+            <Input
+              label="Confirm Password"
+              name="confirm-password"
+              type="password"
+              value={form.password}
+              placeholder="••••••••"
+              onChange={handleChange}
+            />
 
             <Button
               disabled={signupMutation.isPending}
               className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] rounded-lg text-white font-medium"
             >
-              {signupMutation.isPending ? "Creating account…" : "Create account"}
+              {signupMutation.isPending
+                ? "Creating account…"
+                : "Create account"}
             </Button>
           </form>
 
@@ -100,7 +129,6 @@ export function SignupForm() {
             leftIcon={<Github size={18} />}
             className="w-full h-11 flex items-center justify-center gap-3 bg-[#24292e] hover:bg-[#2f363d] border border-[#2D3148] rounded-lg text-white"
           >
-            
             Sign up with GitHub
           </Button>
 
