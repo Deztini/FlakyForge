@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useSignup } from "../../hooks/useAuth";
+import { useSignup, useGithubLogin } from "../../hooks/useAuth";
 import { getErrorMessage } from "../../hooks/useAuth";
 import { Logo } from "../Logo";
 import { Input } from "../Input";
@@ -29,7 +29,7 @@ export function SignupForm() {
   });
 
   const signupMutation = useSignup();
-  // const { login: githubLogin } = useGithubLogin();
+  const { login: githubLogin } = useGithubLogin();
 
   const errorMessage = signupMutation.error
     ? getErrorMessage(signupMutation.error)
@@ -44,7 +44,9 @@ export function SignupForm() {
     });
   };
 
-  const githubLogin = () => {};
+  const handleGithubLogin = () => {
+    githubLogin();
+  };
 
   return (
     <div className="min-h-screen bg-[#0F1117] flex items-center justify-center p-4">
@@ -129,7 +131,7 @@ export function SignupForm() {
           </div>
 
           <Button
-            onClick={githubLogin}
+            onClick={handleGithubLogin}
             leftIcon={<Github size={18} />}
             className="w-full h-11 flex items-center justify-center gap-3 bg-[#24292e] hover:bg-[#2f363d] border border-[#2D3148] rounded-lg text-white"
           >
