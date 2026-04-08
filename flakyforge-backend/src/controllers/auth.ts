@@ -10,6 +10,7 @@ import { ApiError } from "../utils/ApiError";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import { RefreshToken } from "../models/RefreshToken";
 import { env } from "../config/env";
+import { User } from "../models/User";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -42,7 +43,20 @@ export const AuthController = {
     try {
       const { email } = resendOtpSchema.parse(req.body);
 
-      const result = await AuthService.resendOtp(email);
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw ApiError.notFound("No account found with this email");
+      }
+
+      let purpose: "verify" | "reset";
+
+      if (!user.isVerified) {
+        purpose = "verify";
+      } else {
+        purpose = "reset";
+      }
+
+      const result = await AuthService.resendOtp(email, purpose);
 
       res.status(200).json(result);
     } catch (err) {
@@ -105,9 +119,7 @@ export const AuthController = {
       res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
 
       const frontendUrl = env.FRONTEND_URL;
-      res.redirect(
-        `${frontendUrl}/auth/github/callback`,
-      );
+      res.redirect(`${frontendUrl}/auth/github/callback`);
     } catch (error) {
       const frontendUrl = env.FRONTEND_URL;
 

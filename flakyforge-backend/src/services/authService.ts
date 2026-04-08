@@ -43,6 +43,7 @@ export const AuthService = {
       email: input.email,
       code: otp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      purpose: "verify",
     });
 
     await sendOtpEmail(input.email, otp);
@@ -54,7 +55,7 @@ export const AuthService = {
     };
   },
 
-  async resendOtp(email: string) {
+  async resendOtp(email: string, purpose: "verify" | "reset") {
     const user = await User.findOne({ email });
     if (!user) {
       throw ApiError.notFound("No account found with this email");
@@ -72,12 +73,16 @@ export const AuthService = {
       email,
       code: otp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      purpose,
     });
 
     await sendOtpEmail(email, otp);
 
     return {
-      message: "A new verification code has been sent to your email.",
+      message:
+        purpose === "verify"
+          ? "A new verification code has been sent to your email."
+          : "A new password reset code has been sent to your email.",
     };
   },
 
@@ -100,16 +105,37 @@ export const AuthService = {
       throw ApiError.badRequest("Incorrect verification code");
     }
 
-    await User.updateOne(
-      { email: input.email },
-      { $set: { isVerified: true } },
-    );
+    const user = await User.findOne({ email: input.email });
+    if (!user) {
+      throw ApiError.notFound("User not found");
+    }
 
-    await Otp.deleteOne({ email: input.email });
+    if (otpRecord.purpose === "verify") {
+      await User.updateOne(
+        { email: input.email },
+        { $set: { isVerified: true } },
+      );
 
-    return {
-      message: "Email verification successful",
-    };
+      await Otp.deleteOne({ email: input.email });
+
+      return {
+        message: "Email verification successful",
+      };
+    }
+
+    if (otpRecord.purpose === "reset") {
+      const resetToken = signAccessToken({
+        userId: user._id.toString(),
+        email: user.email,
+      });
+
+      await Otp.deleteOne({ email: input.email });
+
+      return {
+        message: "OTP verified",
+        resetToken,
+      };
+    }
   },
 
   async login(input: LoginInput) {
@@ -152,7 +178,7 @@ export const AuthService = {
     };
   },
 
-   async forgotPassword(email: string) {
+  async forgotPassword(email: string) {
     const user = await User.findOne({ email });
     if (!user) {
       throw ApiError.notFound("No account found with this email");
@@ -166,6 +192,7 @@ export const AuthService = {
       email,
       code: otp,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+      purpose: "reset",
     });
 
     await sendOtpEmail(email, otp);
@@ -175,26 +202,22 @@ export const AuthService = {
     };
   },
 
-     async resetPassword(input: ResetPasswordInput) {
-    const user = await User.findOne({ email });
+  async resetPassword(userId: string, input: ResetPasswordInput) {
+    const user = await User.findById({ id: userId });
     if (!user) {
-      throw ApiError.notFound("No account found with this email");
+      throw ApiError.notFound("User not found");
     }
 
-    const otp = generateOtp();
+    const hashedPassword = await bcrypt.hash(input.newPassword, 12);
 
-    await Otp.deleteMany({ email });
+    user.password = hashedPassword;
 
-    await Otp.create({
-      email,
-      code: otp,
-      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-    });
+    await user.save();
 
-    await sendOtpEmail(email, otp);
+    await RefreshToken.deleteMany({ userId: user._id });
 
     return {
-      message: "A verification code has been sent to your email.",
+      message: "Password reset successful",
     };
   },
 
