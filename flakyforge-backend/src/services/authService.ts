@@ -151,6 +151,29 @@ export const AuthService = {
     };
   },
 
+   async forgotPassword(email: string) {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw ApiError.notFound("No account found with this email");
+    }
+
+    const otp = generateOtp();
+
+    await Otp.deleteMany({ email });
+
+    await Otp.create({
+      email,
+      code: otp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    await sendOtpEmail(email, otp);
+
+    return {
+      message: "A verification code has been sent to your email.",
+    };
+  },
+
   async refresh(token: string) {
     const decoded = verifyRefreshToken(token);
 
