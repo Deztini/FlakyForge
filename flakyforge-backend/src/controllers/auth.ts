@@ -4,6 +4,7 @@ import {
   otpSchema,
   signupSchema,
   resendOtpSchema,
+  resetPasswordSchema,
 } from "../validators/auth.schema";
 import { AuthService } from "../services/authService";
 import { ApiError } from "../utils/ApiError";
@@ -11,6 +12,7 @@ import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import { RefreshToken } from "../models/RefreshToken";
 import { env } from "../config/env";
 import { User } from "../models/User";
+import { verifyAccessToken } from "../utils/jwt";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -58,7 +60,7 @@ export const AuthController = {
 
       const result = await AuthService.resendOtp(email, purpose);
 
-      res.status(200).json(result);
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
@@ -70,7 +72,45 @@ export const AuthController = {
 
       const result = await AuthService.verifyOtp(input);
 
-      res.status(200).json(result);
+      if (result?.resetToken) {
+        res.cookie("resetToken", result?.resetToken, ACCESS_COOKIE_OPTIONS);
+      }
+
+      res.status(201).json(result?.message);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const input = resendOtpSchema.parse(req.body);
+
+      const result = await AuthService.forgotPassword(input.email);
+
+      res.status(201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = req.cookies.resetToken;
+
+      if (!token) {
+        throw ApiError.unauthorized("Reset session expired");
+      }
+
+      const decoded = verifyAccessToken(token);
+
+      const input = resetPasswordSchema.parse(req.body);
+
+      const result = await AuthService.resetPassword(decoded.userId, input);
+
+      res.clearCookie("resetToken");
+
+      res.status(201).json(result);
     } catch (error) {
       next(error);
     }
