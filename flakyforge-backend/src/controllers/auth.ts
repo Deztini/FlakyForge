@@ -106,7 +106,7 @@ export const AuthController = {
 
       const frontendUrl = env.FRONTEND_URL;
       res.redirect(
-        `${frontendUrl}/auth/github/callback?name=${encodeURIComponent(user.fullName)}&email=${encodeURIComponent(user.email)}&role=${encodeURIComponent(user.role)}`,
+        `${frontendUrl}/auth/github/callback`,
       );
     } catch (error) {
       const frontendUrl = env.FRONTEND_URL;

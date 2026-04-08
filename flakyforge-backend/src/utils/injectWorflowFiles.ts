@@ -1,7 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import nacl from "tweetnacl";
+import _sodium from "libsodium-wrappers";
 
 const WORKFLOW_ROOT = path.resolve(__dirname, "../../../Flaky Test Workflow");
 
@@ -70,19 +70,23 @@ function buildFilesToInject() {
 
 const FILES_TO_INJECT = buildFilesToInject();
 
-function encryptSecret(publicKey: string, secretValue: string): string {
-  const keyBytes = Buffer.from(publicKey, "base64");
+async function encryptSecret(
+  publicKey: string,
+  secretValue: string,
+): Promise<string> {
+  await _sodium.ready;
+  const sodium = _sodium;
 
-  const secretBytes = Buffer.from(secretValue);
-
-  const encryptedBytes = nacl.box(
-    secretBytes,
-    new Uint8Array(24),
-    new Uint8Array(keyBytes),
-    nacl.box.keyPair().secretKey,
+  const keyBytes = sodium.from_base64(
+    publicKey,
+    sodium.base64_variants.ORIGINAL,
   );
 
-  return Buffer.from(encryptedBytes).toString("base64");
+  const secretBytes = sodium.from_string(secretValue);
+
+  const encryptedBytes = sodium.crypto_box_seal(secretBytes, keyBytes);
+
+  return sodium.to_base64(encryptedBytes, sodium.base64_variants.ORIGINAL);
 }
 
 async function getRepoPublicKey(
@@ -107,7 +111,7 @@ async function setRepoSecret(
 ): Promise<void> {
   const { key, key_id } = await getRepoPublicKey(owner, repo, accessToken);
 
-  const encryptedValue = encryptSecret(key, secretValue);
+  const encryptedValue = await encryptSecret(key, secretValue);
 
   await axios.put(
     `https://api.github.com/repos/${owner}/${repo}/actions/secrets/${secretName}`,
