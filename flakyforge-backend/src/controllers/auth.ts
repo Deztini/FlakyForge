@@ -76,7 +76,7 @@ export const AuthController = {
         res.cookie("resetToken", result?.resetToken, ACCESS_COOKIE_OPTIONS);
       }
 
-      res.status(201).json(result?.message);
+      res.status(201).json({ message: result?.message });
     } catch (error) {
       next(error);
     }
