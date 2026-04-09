@@ -15,6 +15,7 @@ export interface LoginInput {
 export interface VerifyOtpInput {
   email: string;
   code: string;
+  purpose?: "verify" | "reset";
 }
 
 export interface ForgotPasswordInput {
@@ -58,7 +59,10 @@ export const authApi = {
   },
 
   verifyOtp: async (input: VerifyOtpInput): Promise<MessageResponse> => {
-    const { data } = await api.post<MessageResponse>("/auth/verify-otp", input);
+    const { data } = await api.post<MessageResponse>("/auth/verify-otp", {
+      email: input.email,
+      code: input.code,
+    });
     return data;
   },
 

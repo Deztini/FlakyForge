@@ -37,8 +37,14 @@ export const useVerifyOtp = () => {
 
   return useMutation({
     mutationFn: authApi.verifyOtp,
-    onSuccess: () => {
-      router.navigate({ to: "/login" });
+     onSuccess: (_, variables) => {
+      const purpose = (variables as any).purpose;
+
+      if (purpose === "reset") {
+        router.navigate({ to: "/reset-password" });
+      } else {
+        router.navigate({ to: "/login" });
+      }
     },
     onError: (error) => {
       console.error("[verify-otp error]", getErrorMessage(error));
@@ -67,6 +73,37 @@ export const useLogin = () => {
     },
     onError: (error) => {
       console.error("[login error]", getErrorMessage(error));
+    },
+  });
+};
+
+export const useForgotPassword = () => {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.forgotPassword,
+    onSuccess: (_, variables) => {
+      router.navigate({
+        to: "/verify-otp",
+        search: { email: variables.email, purpose: "reset" },
+      });
+    },
+    onError: (error) => {
+      console.error("[forgot-password error]", getErrorMessage(error));
+    },
+  });
+};
+
+export const useResetPassword = () => {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: authApi.resetPassword,
+    onSuccess: () => {
+      router.navigate({ to: "/login" });
+    },
+    onError: (error) => {
+      console.error("[reset-password error]", getErrorMessage(error));
     },
   });
 };
