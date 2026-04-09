@@ -35,7 +35,7 @@ export function Navbar() {
             Sign In
           </Button>
           <Button
-            handleClick={() => navigate({ to: "/dashboard" })}
+            handleClick={() => navigate({ to: "/signup" })}
             className="h-9 px-5 bg-[#6C63FF] text-white hover:bg-[#5B52E8] transition-colors text-[14px] font-medium"
           >
             Get Started

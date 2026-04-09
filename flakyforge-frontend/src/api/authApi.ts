@@ -17,6 +17,15 @@ export interface VerifyOtpInput {
   code: string;
 }
 
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -39,7 +48,7 @@ export interface MessageResponse {
 }
 
 export interface RefreshResponse {
-  user: AuthUser
+  user: AuthUser;
 }
 
 export const authApi = {
@@ -62,6 +71,26 @@ export const authApi = {
 
   login: async (input: LoginInput): Promise<LoginResponse> => {
     const { data } = await api.post<LoginResponse>("/auth/login", input);
+    return data;
+  },
+
+  forgotPassword: async (
+    input: ForgotPasswordInput,
+  ): Promise<MessageResponse> => {
+    const { data } = await api.post<MessageResponse>(
+      "/auth/forgot-password",
+      input,
+    );
+    return data;
+  },
+
+  resetPassword: async (
+    input: ResetPasswordInput,
+  ): Promise<MessageResponse> => {
+    const { data } = await api.post<MessageResponse>(
+      "/auth/reset-password",
+      input,
+    );
     return data;
   },
 
