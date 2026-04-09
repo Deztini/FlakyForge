@@ -4,19 +4,22 @@ import { useVerifyOtp, useResendOtp, getErrorMessage } from "../hooks/useAuth";
 import { Logo } from "../components/Logo";
 import { Button } from "../components/Button";
 
-type VerifyOtpSearch = { email: string };
+type VerifyOtpSearch = { 
+  email: string;
+  purpose: "verify" | "reset"; 
+};
 
 export const Route = createFileRoute("/verify-otp")({
   validateSearch: (search: Record<string, unknown>): VerifyOtpSearch => ({
     email: String(search.email ?? ""),
+    purpose: search.purpose === "reset" ? "reset" : "verify", // add this
   }),
   component: VerifyOtpPage,
 });
-
 const OTP_LENGTH = 6;
 
 function VerifyOtpPage() {
-  const { email } = Route.useSearch();
+  const { email, purpose } = Route.useSearch();
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [countdown, setCountdown] = useState(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -46,7 +49,7 @@ function VerifyOtpPage() {
     if (val && i < OTP_LENGTH - 1) inputRefs.current[i + 1]?.focus();
 
     const code = arr.join("");
-    if (code.length === OTP_LENGTH) verifyMutation.mutate({ email, code });
+    if (code.length === OTP_LENGTH) verifyMutation.mutate({ email, code, purpose });
   };
 
   const handleResend = () => {
