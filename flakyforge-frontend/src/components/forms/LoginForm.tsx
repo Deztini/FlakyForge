@@ -106,6 +106,15 @@ export function LoginForm() {
               />
             </div>
 
+            <div className="flex justify-end mt-1">
+              <Link
+                to="/forgot-password"
+                className="text-[#6C63FF] text-[13px] hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             <Button
               type="submit"
               disabled={isSubmitting || loginMutation.isPending}
