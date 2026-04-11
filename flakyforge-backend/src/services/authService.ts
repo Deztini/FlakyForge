@@ -203,7 +203,7 @@ export const AuthService = {
   },
 
   async resetPassword(userId: string, input: ResetPasswordInput) {
-    const user = await User.findById({ id: userId });
+    const user = await User.findById({ _id: userId });
     if (!user) {
       throw ApiError.notFound("User not found");
     }
