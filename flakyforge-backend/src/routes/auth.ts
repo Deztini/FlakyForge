@@ -1,20 +1,21 @@
 import Router from "express";
 import passport from "passport";
 import { AuthController } from "../controllers/auth";
+import { authLimiter, globalLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
-router.post("/signup", AuthController.signup);
+router.post("/signup", authLimiter, AuthController.signup);
 
-router.post("/verify-otp", AuthController.verifyOtp);
+router.post("/verify-otp", authLimiter, AuthController.verifyOtp);
 
-router.post("/resend-otp", AuthController.resendOtp);
+router.post("/resend-otp", authLimiter, AuthController.resendOtp);
 
-router.post("/login", AuthController.login);
+router.post("/login", authLimiter, AuthController.login);
 
-router.post("/forgot-password", AuthController.forgotPassword);
+router.post("/forgot-password", authLimiter, AuthController.forgotPassword);
 
-router.post("/reset-password", AuthController.resetPassword);
+router.post("/reset-password", authLimiter, AuthController.resetPassword);
 
 router.get(
   "/github",
@@ -33,8 +34,8 @@ router.get(
   AuthController.githubCallback,
 );
 
-router.post("/refresh", AuthController.refresh);
+router.post("/refresh", globalLimiter, AuthController.refresh);
 
-router.post("/logout", AuthController.logout);
+router.post("/logout", globalLimiter, AuthController.logout);
 
 export default router;

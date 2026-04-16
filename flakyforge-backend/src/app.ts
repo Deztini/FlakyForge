@@ -5,6 +5,7 @@ import passport from "passport";
 import "./config/github";
 import router from "./routes/index";
 import { errorHandler } from "./middleware/errorHandler";
+import { globalLimiter } from "./middleware/rateLimiter";
 
 const app = express();
 
@@ -16,6 +17,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(globalLimiter);
 
 app.use(cookieParser());
 
