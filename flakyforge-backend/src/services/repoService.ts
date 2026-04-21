@@ -137,8 +137,28 @@ export const RepoService = {
     return repository;
   },
 
-  async getUserRepos(userId: string) {
-    return Repository.find({ userId }).sort({ createdAt: -1 });
+  async getUserRepos(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const [repos, total] = await Promise.all([
+      Repository.find({ userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select("-apiKey"),
+      Repository.countDocuments({ userId }),
+    ]);
+    return {
+      repos,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / page),
+        hasNext: page < Math.ceil(total / page),
+        hasPrev: page > 1,
+      },
+    };
   },
 
   async triggerScan(repoId: string, user: IUser) {
@@ -263,16 +283,15 @@ export const RepoService = {
   },
 };
 
-
 async function classifyAndUpdateTestRun(
   testRunId: string,
-  flakyTests: { id: string; testCode: string; [key: string]: any }[]
+  flakyTests: { id: string; testCode: string; [key: string]: any }[],
 ) {
   try {
     console.log(`Classifying ${flakyTests.length} flaky tests...`);
 
     const classificationMap = await ClassifierService.classifyFlakyTests(
-      flakyTests.map((t) => ({ id: t.id, testCode: t.testCode }))
+      flakyTests.map((t) => ({ id: t.id, testCode: t.testCode })),
     );
 
     console.log(classificationMap);
