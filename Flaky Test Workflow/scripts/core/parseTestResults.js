@@ -1,4 +1,5 @@
 const fs = require("fs");
+const crypto = require("crypto");
 
 function readJSON(filePath) {
   try {
@@ -7,6 +8,41 @@ function readJSON(filePath) {
   } catch (err) {
     console.log(`Failed to read/parse ${filePath}`);
     return null;
+  }
+}
+
+function extractTestCode(filePath, testName) {
+  try {
+    const source = fs.readFileSync(filePath, "utf-8");
+    const lines = source.split("\n");
+    const startIndex = lines.findIndex((line) => line.includes(testName));
+
+    if (startIndex === -1) return source.slice(0, 500);
+
+    let openBraces = 0;
+    let started = false;
+    let endIndex = startIndex;
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+
+      for (const char of line) {
+        if (char === "{") {
+          openBraces++;
+          started = true;
+        }
+        if (char === "}") openBraces--;
+      }
+
+      if (started && openBraces === 0) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    return lines.slice(startIndex, endIndex + 1).join("\n");
+  } catch (err) {
+    return "";
   }
 }
 
@@ -20,9 +56,11 @@ function parseTestResults(filePath, framework) {
         suite.assertionResults
           ?.filter((t) => t.status === "failed")
           .map((t) => ({
+            id: crypto.randomUUID(),
             name: t.fullName,
             message: t.failureMessages?.join("\n") || "",
             file: suite.name,
+            testCode: extractTestCode(suite.name, t.fullName),
           })),
       ) || []
     );
@@ -34,9 +72,11 @@ function parseTestResults(filePath, framework) {
         suite.assertionResults
           ?.filter((t) => t.status === "fail")
           .map((t) => ({
+            id: crypto.randomUUID(),
             name: t.fullName,
             message: t.errors?.map((e) => e.message).join("\n") || "",
             file: suite.name,
+            testCode: extractTestCode(suite.name, t.fullName),
           })),
       ) || []
     );
@@ -44,17 +84,21 @@ function parseTestResults(filePath, framework) {
 
   if (framework === "mocha") {
     return (data.failures || []).map((t) => ({
+      id: crypto.randomUUID(),
       name: t.fullTitle,
       message: t.err?.message || "",
       file: t.file,
+      testCode: extractTestCode(t.file, t.fullTitle),
     }));
   }
 
   if (framework === "cypress") {
     return (data.failures || []).map((t) => ({
+      id: crypto.randomUUID(),
       name: t.fullTitle,
       message: t.err?.message || "",
       file: t.file,
+      testCode: extractTestCode(t.file, t.fullTitle),
     }));
   }
 
@@ -67,9 +111,11 @@ function parseTestResults(filePath, framework) {
           test.results?.forEach((result) => {
             if (result.status === "failed") {
               results.push({
+                id: crypto.randomUUID(),
                 name: spec.title,
                 message: result.error?.message || "",
                 file: spec.file,
+                testCode: extractTestCode(spec.file, spec.title),
               });
             }
           });
