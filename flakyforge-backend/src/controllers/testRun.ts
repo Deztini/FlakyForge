@@ -9,10 +9,13 @@ const collectResultsSchema = z.object({
   repoFullName: z.string(),
   results: z.array(
     z.object({
+      id: z.string(),
       name: z.string(),
       failRate: z.number(),
+      testCode: z.string(),
       runs: z.number(),
       isFlaky: z.boolean(),
+      file: z.string()
     }),
   ),
 });
