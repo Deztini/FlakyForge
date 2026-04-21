@@ -22,5 +22,7 @@ export const env = {
   BACKEND_URL: process.env.BACKEND_URL!,
 
   WEBHOOK_SECRET: process.env.WEBHOOK_SECRET!,
-  NGROK_URL: process.env.NGROK_URL!
+  NGROK_URL: process.env.NGROK_URL!,
+
+  CLASSIFIER_URL: process.env.CLASSIFIER_URL!
 }
