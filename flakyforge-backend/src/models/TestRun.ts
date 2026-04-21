@@ -1,10 +1,15 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IFlakyResult {
+  id: string;
   name: string;
   failRate: number;
+  file: string;
+  testCode: string;
   runs: number;
   isFlaky: boolean;
+  flakeType?: "async wait" | "concurrency" | "network";
+  confidence?: number;
 }
 
 export interface ITestRun extends Document {
@@ -23,9 +28,13 @@ export interface ITestRun extends Document {
 
 const FlakyResultSchema = new Schema<IFlakyResult>({
   name: { type: String, required: true },
+  file: { type: String, default: "" },
+  testCode: { type: String, default: "" },
   failRate: { type: Number, required: true },
   runs: { type: Number, required: true },
   isFlaky: { type: Boolean, required: true },
+  flakeType: { type: String, enum: ["async wait", "concurrency", "network"] },
+  confidence: { type: Number },
 });
 
 const TestRunSchema = new Schema<ITestRun>(
