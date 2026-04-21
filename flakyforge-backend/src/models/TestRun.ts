@@ -8,7 +8,7 @@ interface IFlakyResult {
   testCode: string;
   runs: number;
   isFlaky: boolean;
-  flakeType?: "async wait" | "concurrency" | "network";
+  flakyType?: "async wait" | "concurrency" | "network";
   confidence?: number;
 }
 
@@ -33,7 +33,7 @@ const FlakyResultSchema = new Schema<IFlakyResult>({
   failRate: { type: Number, required: true },
   runs: { type: Number, required: true },
   isFlaky: { type: Boolean, required: true },
-  flakeType: { type: String, enum: ["async wait", "concurrency", "network"] },
+  flakyType: { type: String, enum: ["async wait", "concurrency", "network"] },
   confidence: { type: Number },
 });
 

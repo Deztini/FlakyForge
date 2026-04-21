@@ -6,6 +6,7 @@ import { Repository } from "../models/Repository";
 import { env } from "../config/env";
 import { injectWorkflowFiles } from "../utils/injectWorflowFiles";
 import { TestRun } from "../models/TestRun";
+import { ClassifierService } from "./classifierService";
 
 interface GitHubRepo {
   id: number;
@@ -184,8 +185,11 @@ export const RepoService = {
       githubRepoId: number;
       repoFullName: string;
       results: {
+        id: string;
         name: string;
         failRate: number;
+        file: string;
+        testCode: string;
         runs: number;
         isFlaky: boolean;
       }[];
@@ -212,7 +216,7 @@ export const RepoService = {
           totalRuns,
           flakyTests: payload.results,
           completedAt: new Date(),
-          status: "completed"
+          status: "completed",
         },
       },
       {
@@ -231,6 +235,10 @@ export const RepoService = {
         status: "active",
       },
     });
+
+    if (flakyTests.length > 0) {
+      classifyAndUpdateTestRun(testRun._id.toString(), flakyTests);
+    }
 
     return testRun;
   },
@@ -254,3 +262,36 @@ export const RepoService = {
     );
   },
 };
+
+
+async function classifyAndUpdateTestRun(
+  testRunId: string,
+  flakyTests: { id: string; testCode: string; [key: string]: any }[]
+) {
+  try {
+    console.log(`Classifying ${flakyTests.length} flaky tests...`);
+
+    const classificationMap = await ClassifierService.classifyFlakyTests(
+      flakyTests.map((t) => ({ id: t.id, testCode: t.testCode }))
+    );
+
+    console.log(classificationMap);
+
+    const updatedFlakyTests = flakyTests.map((test) => {
+      const classification = classificationMap.get(test.id);
+      return {
+        ...test,
+        flakyType: classification?.label,
+        confidence: classification?.confidence,
+      };
+    });
+
+    await TestRun.findByIdAndUpdate(testRunId, {
+      $set: { flakyTests: updatedFlakyTests },
+    });
+
+    console.log(`Classification complete for test run ${testRunId}`);
+  } catch (err) {
+    console.error("Background classification failed:", err);
+  }
+}
