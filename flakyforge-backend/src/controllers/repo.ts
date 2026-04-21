@@ -42,8 +42,18 @@ export const RepoController = {
   async getUserRepos(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user as IUser;
-      const repos = await RepoService.getUserRepos(user._id.toString());
-      res.status(200).json(repos);
+
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+
+      const safeLimit = Math.min(Math.max(limit, 1), 50);
+
+      const result = await RepoService.getUserRepos(
+        user._id.toString(),
+        page,
+        safeLimit,
+      );
+      res.status(200).json(result);
     } catch (err) {
       next(err);
     }
