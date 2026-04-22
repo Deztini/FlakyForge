@@ -20,7 +20,11 @@ export const RepoController = {
     try {
       const user = req.user as IUser;
       const repos = await RepoService.getAvailableRepos(user);
-      res.status(200).json(repos);
+      res.status(200).json({
+        success: true,
+        message: "Available repositories fetched successfully",
+        data: { repos },
+      });
     } catch (err) {
       next(err);
     }
@@ -33,7 +37,11 @@ export const RepoController = {
       const repository = await RepoService.connectRepos(user, payload);
       res
         .status(201)
-        .json({ message: "Repository connected successfully.", repository });
+        .json({
+          sucess: true,
+          message: "Repository connected successfully.",
+          data: { repository },
+        });
     } catch (err) {
       next(err);
     }
@@ -53,7 +61,13 @@ export const RepoController = {
         page,
         safeLimit,
       );
-      res.status(200).json(result);
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Repositories fetched successfully",
+          data: result,
+        });
     } catch (err) {
       next(err);
     }
