@@ -1,19 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { ApiError } from '../utils/ApiError';
+import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
+import { ApiError } from "../utils/ApiError";
 
 export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-
   if (err instanceof ZodError) {
     return res.status(400).json({
-      error:  'Validation failed',
-      issues: (err as ZodError).issues.map((e) => ({
-        field:   e.path.join('.'),
+      success: false,
+      message: "Validation failed",
+      errors: (err as ZodError).issues.map((e) => ({
+        field: e.path.join("."),
         message: e.message,
       })),
     });
@@ -21,12 +21,14 @@ export function errorHandler(
 
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
-      error: err.message,
+      success: false,
+      message: err.message,
     });
   }
 
-  console.error('Unexpected error:', err);
+  console.error("Unexpected error:", err);
   return res.status(500).json({
-    error: 'Something went wrong. Please try again.',
+    success: false,
+    message: "Something went wrong. Please try again.",
   });
 }
