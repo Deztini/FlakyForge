@@ -11,7 +11,7 @@ async function main() {
     vitest: "vitest-results.json",
     playwright: "playwright-results.json",
     cypress: "mochawesome-report/mochawesome.json",
-    default: "default-results.json"
+    default: "default-results.json",
   };
 
   console.log("FlakeyRadar started...");
@@ -23,8 +23,12 @@ async function main() {
 
   const filePath = fileMap[framework];
   const failedTest = parseTestResults(filePath, framework);
+
+  const totalTests = getTotalTestCount(filePath, framework);
+
   const flakyResults = await rerunTests(failedTest, framework);
-  writeJSON("flaky-results.json", flakyResults);
+
+  writeJSON("flaky-results.json", { totalTests, results: flakyResults });
 
   console.log("Flaky results saved");
 }
