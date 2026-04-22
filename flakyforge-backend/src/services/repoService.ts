@@ -227,6 +227,7 @@ export const RepoService = {
     const flakyCount = flakyTests.length;
 
     const totalRuns = payload.results.reduce((sum, t) => sum + t.runs, 0);
+    const totalTests = payload.results.map((r) => r.name).length;
 
     const testRun = await TestRun.findOneAndUpdate(
       { repositoryId: repository._id, status: "pending" },

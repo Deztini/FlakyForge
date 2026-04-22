@@ -21,6 +21,9 @@ export interface ITestRun extends Document {
   flakyTests: IFlakyResult[];
   flakyCount: number;
   totalRuns: number;
+  commitSha: string;
+  totalTests: number;
+  duration: number;
   startedAt: Date;
   completedAt: Date | null;
   createdAt: Date;
@@ -63,6 +66,9 @@ const TestRunSchema = new Schema<ITestRun>(
     flakyTests: [FlakyResultSchema],
     flakyCount: { type: Number, default: 0 },
     totalRuns: { type: Number, default: 0 },
+     totalTests: { type: Number, default: 0 },
+    commitSha: { type: String, default: null },
+    duration: { type: Number, default: null },
     startedAt: { type: Date, default: Date.now },
     completedAt: { type: Date, default: null },
   },
