@@ -35,7 +35,12 @@ export const AuthController = {
 
       const result = await AuthService.signup(input);
 
-      res.status(201).json(result);
+      res.status(201).json({
+        success: true,
+        message:
+          "Account created. Please check email for the 6 digit verification code",
+        data: result,
+      });
     } catch (error) {
       next(error);
     }
@@ -60,7 +65,7 @@ export const AuthController = {
 
       const result = await AuthService.resendOtp(email, purpose);
 
-      res.status(201).json(result);
+      res.status(201).json({ sucess: true, message: `${result.message}` });
     } catch (err) {
       next(err);
     }
@@ -76,7 +81,7 @@ export const AuthController = {
         res.cookie("resetToken", result?.resetToken, ACCESS_COOKIE_OPTIONS);
       }
 
-      res.status(201).json({ message: result?.message });
+      res.status(201).json({ success: true, message: result?.message });
     } catch (error) {
       next(error);
     }
@@ -88,7 +93,7 @@ export const AuthController = {
 
       const result = await AuthService.forgotPassword(input.email);
 
-      res.status(201).json(result);
+      res.status(201).json({ success: true, message: result.message });
     } catch (error) {
       next(error);
     }
@@ -110,7 +115,7 @@ export const AuthController = {
 
       res.clearCookie("resetToken");
 
-      res.status(201).json(result);
+      res.status(201).json({ success: true, message: result.message });
     } catch (error) {
       next(error);
     }
@@ -126,8 +131,9 @@ export const AuthController = {
       res.cookie("accessToken", result.accessToken, ACCESS_COOKIE_OPTIONS);
 
       res.status(201).json({
+        success: true,
         message: result.message,
-        user: result.user,
+        data: result.user,
       });
     } catch (error) {
       next(error);
@@ -180,7 +186,7 @@ export const AuthController = {
       res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
       res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({ user });
+      res.status(200).json({ success: true, message: "Refresh successful", data: user });
     } catch (err) {
       next(err);
     }
@@ -195,7 +201,7 @@ export const AuthController = {
       res.clearCookie("refreshToken", COOKIE_OPTIONS);
       res.clearCookie("accessToken", ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({ message: "Logged out successfully" });
+      res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (err) {
       next(err);
     }

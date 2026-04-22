@@ -49,8 +49,6 @@ export const AuthService = {
     await sendOtpEmail(input.email, otp);
 
     return {
-      message:
-        "Account created. Please check email for the 6 digit verification code",
       email: user.email,
     };
   },
