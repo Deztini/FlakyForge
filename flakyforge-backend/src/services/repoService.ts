@@ -204,6 +204,8 @@ export const RepoService = {
     payload: {
       githubRepoId: number;
       repoFullName: string;
+      commitSha: string;
+      totalTests: number;
       results: {
         id: string;
         name: string;
@@ -227,7 +229,19 @@ export const RepoService = {
     const flakyCount = flakyTests.length;
 
     const totalRuns = payload.results.reduce((sum, t) => sum + t.runs, 0);
-    const totalTests = payload.results.map((r) => r.name).length;
+
+    const pendingTestRun = await TestRun.findOne(
+      { repositoryId: repository._id, status: "pending" },
+      null,
+      { sort: { startedAt: -1 } },
+    );
+
+    if (!pendingTestRun)
+      throw ApiError.notFound("No pending test run found for this repo");
+
+    const duration = Math.floor(
+      (Date.now() - pendingTestRun.startedAt.getTime()) / 1000,
+    );
 
     const testRun = await TestRun.findOneAndUpdate(
       { repositoryId: repository._id, status: "pending" },
@@ -235,6 +249,9 @@ export const RepoService = {
         $set: {
           flakyCount,
           totalRuns,
+          totalTests: payload.totalTests,
+          commitSha: payload.commitSha,
+          duration,
           flakyTests: payload.results,
           completedAt: new Date(),
           status: "completed",
