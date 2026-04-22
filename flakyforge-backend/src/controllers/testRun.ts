@@ -35,8 +35,9 @@ export const TestRunController = {
       const testRun = await RepoService.triggerScan(req.params.repoId, user);
 
       res.status(201).json({
+        success: true,
         message: "Scan triggered successfully",
-        testRun,
+        data: { testRun },
       });
     } catch (err) {
       next(err);
@@ -58,8 +59,9 @@ export const TestRunController = {
       const testRun = await RepoService.collectResults(apiKey, payload);
 
       res.status(201).json({
+        success: true,
         message: "Results collected successfully",
-        testRun,
+        data: { testRun },
       });
     } catch (err) {
       next(err);
@@ -78,7 +80,11 @@ export const TestRunController = {
         limit,
       );
 
-      res.status(200).json(result);
+      res.status(200).json({
+        success: true,
+        message: "Test runs fetched successfully",
+        data: result,
+      });
     } catch (err) {
       next(err);
     }
@@ -88,7 +94,13 @@ export const TestRunController = {
     try {
       const user = req.user as IUser;
       const metrics = await TestRunService.getMetrics(user._id.toString());
-      res.status(200).json(metrics);
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Metrics fetched successfully",
+          data: metrics,
+        });
     } catch (err) {
       next(err);
     }
