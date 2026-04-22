@@ -14,7 +14,7 @@ export const TestRunService = {
       TestRun.countDocuments({ userId }),
     ]);
 
-    return {
+    const result = {
       testRuns,
       pagination: {
         total,
@@ -25,6 +25,8 @@ export const TestRunService = {
         hasPrev: page > 1,
       },
     };
+
+    return result;
   },
 
   async getMetrics(userId: string) {
@@ -62,11 +64,13 @@ export const TestRunService = {
     const successRate =
       totalRuns > 0 ? Math.round((cleanRuns / totalRuns) * 100) : 0;
 
-    return {
+    const result = {
       totalRuns,
       runsToday,
       successRate,
       avgDuration: Math.floor(avg?.avgDuration || 0),
     };
+
+    return result;
   },
 };
