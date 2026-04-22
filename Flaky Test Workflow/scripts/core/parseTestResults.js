@@ -46,6 +46,36 @@ function extractTestCode(filePath, testName) {
   }
 }
 
+
+function getTotalTestCount(filePath, framework) {
+  const data = readJSON(filePath);
+  if (!data) return 0;
+
+  if (framework === "jest") {
+    return data.numTotalTests || 0;
+  }
+
+  if (framework === "vitest") {
+    return data.testResults?.reduce(
+      (sum, suite) => sum + (suite.assertionResults?.length || 0), 0
+    ) || 0;
+  }
+
+  if (framework === "mocha") {
+    return data.stats?.tests || 0;
+  }
+
+  if (framework === "playwright") {
+    let count = 0;
+    data.suites?.forEach((suite) => {
+      suite.specs?.forEach(() => count++);
+    });
+    return count;
+  }
+
+  return 0;
+}
+
 function parseTestResults(filePath, framework) {
   const data = readJSON(filePath);
   if (!data) return [];
@@ -129,4 +159,4 @@ function parseTestResults(filePath, framework) {
   return [];
 }
 
-module.exports = { parseTestResults };
+module.exports = { parseTestResults, getTotalTestCount };
