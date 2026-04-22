@@ -20,8 +20,8 @@ export const TestRunService = {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / page),
-        hasNext: page < Math.ceil(total / page),
+        totalPages: Math.ceil(total / limit),
+        hasNext: page < Math.ceil(total / limit),
         hasPrev: page > 1,
       },
     };
