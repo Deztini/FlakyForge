@@ -31,7 +31,9 @@ jobs:
             const payload = {
               githubRepoId: parseInt('${{ github.repository_id }}'),
               repoFullName: '${{ github.repository }}',
-              results
+              commitSha: '${{ github.sha }}'.slice(0, 7),
+              totalTests: data.totalTests,
+              results: data.results
             };
             fs.writeFileSync('flaky-results.json', JSON.stringify(payload));
           "
