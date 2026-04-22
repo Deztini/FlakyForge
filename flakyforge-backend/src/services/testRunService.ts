@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { TestRun } from "../models/TestRun";
 
 export const TestRunService = {
@@ -13,7 +14,7 @@ export const TestRunService = {
       TestRun.countDocuments({ userId }),
     ]);
 
-     return {
+    return {
       testRuns,
       pagination: {
         total,
@@ -23,6 +24,49 @@ export const TestRunService = {
         hasNext: page < Math.ceil(total / page),
         hasPrev: page > 1,
       },
+    };
+  },
+
+  async getMetrics(userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [totalRuns, runsToday, avgResult] = await Promise.all([
+      TestRun.countDocuments({ userId, status: "completed" }),
+      TestRun.countDocuments({ userId, startedAt: { $gte: today } }),
+      TestRun.aggregate([
+        {
+          $match: {
+            userId: new mongoose.Types.ObjectId(userId),
+            status: "completed",
+            duration: { $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            avgDuration: { $avg: "$duration" },
+          },
+        },
+      ]),
+    ]);
+
+    const avg = avgResult[0];
+
+    const cleanRuns = await TestRun.countDocuments({
+      userId,
+      status: "completed",
+      flakyCount: 0,
+    });
+
+    const successRate =
+      totalRuns > 0 ? Math.round((cleanRuns / totalRuns) * 100) : 0;
+
+    return {
+      totalRuns,
+      runsToday,
+      successRate,
+      avgDuration: Math.floor(avg?.avgDuration || 0),
     };
   },
 };
