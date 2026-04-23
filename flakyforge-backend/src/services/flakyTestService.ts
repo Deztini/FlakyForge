@@ -93,6 +93,9 @@ export const FlakyTestService = {
   },
 
   async getFlakyTestMetrics(userId: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const result = await TestRun.aggregate([
       {
         $match: {
@@ -102,16 +105,34 @@ export const FlakyTestService = {
       },
       { $unwind: "$flakyTests" },
       { $match: { "flakyTests.isFlaky": true } },
+
       {
-        $group: {
-          _id: "$flakyTests.status",
-          count: { $sum: 1 },
+        $facet: {
+          stats: [
+            {
+              $group: {
+                _id: "$flakyTests.status",
+                count: { $sum: 1 },
+              },
+            },
+          ],
+
+          today: [
+            {
+              $match: {
+                completedAt: { $gte: today },
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
         },
       },
     ]);
 
-    const counts = result.reduce(
-      (acc, item) => {
+    const counts = (result?.[0]?.stats || []).reduce(
+      (acc: Record<string, number>, item: any) => {
         acc[item._id] = item.count;
         return acc;
       },
@@ -122,12 +143,15 @@ export const FlakyTestService = {
 
     const fixRate = total > 0 ? Math.round((counts.fixed / total) * 100) : 0;
 
+    const todayCount = result?.[0]?.today?.[0]?.count || 0;
+
     return {
       total,
       fixed: counts.fixed,
       pending: counts.pending,
       unfixed: counts.unfixed,
       fixRate,
+      today: todayCount
     };
   },
 };
