@@ -27,7 +27,7 @@ function GithubCallbackPage() {
       const { data } = await api.post("/auth/refresh");
       console.log(data);
 
-      setAuth(data.user);
+      setAuth(data.data);
 
       navigate({ to: "/dashboard" });
     } catch {
