@@ -31,4 +31,22 @@ export const FlakyTestController = {
       next(err);
     }
   },
+
+  async getFlakyTestMetrics(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user as IUser;
+
+      const result = await FlakyTestService.getFlakyTestMetrics(
+        user._id.toString(),
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Flaky test metrics fetched successfully",
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

@@ -147,11 +147,15 @@ export const FlakyTestService = {
 
     return {
       total,
-      fixed: counts.fixed,
-      pending: counts.pending,
-      unfixed: counts.unfixed,
-      fixRate,
-      today: todayCount
+      breakdown: {
+        fixed: counts.fixed,
+        pending: counts.pending,
+        unfixed: counts.unfixed,
+      },
+      metrics: {
+        fixRate,
+        today: todayCount,
+      },
     };
   },
 };
