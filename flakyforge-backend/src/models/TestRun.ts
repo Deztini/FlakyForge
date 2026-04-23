@@ -10,6 +10,9 @@ interface IFlakyResult {
   isFlaky: boolean;
   flakyType?: "async wait" | "concurrency" | "network";
   confidence?: number;
+  status: "unfixed" | "pending" | "fixed";
+  prNumber: number;
+  prUrl: string;
 }
 
 export interface ITestRun extends Document {
@@ -38,6 +41,13 @@ const FlakyResultSchema = new Schema<IFlakyResult>({
   isFlaky: { type: Boolean, required: true },
   flakyType: { type: String, enum: ["async wait", "concurrency", "network"] },
   confidence: { type: Number },
+  status: {
+    type: String,
+    enum: ["unfixed", "pending", "fixed"],
+    default: "unfixed",
+  },
+  prNumber: { type: Number, default: null },
+  prUrl: { type: String, default: null },
 });
 
 const TestRunSchema = new Schema<ITestRun>(
@@ -66,7 +76,7 @@ const TestRunSchema = new Schema<ITestRun>(
     flakyTests: [FlakyResultSchema],
     flakyCount: { type: Number, default: 0 },
     totalRuns: { type: Number, default: 0 },
-     totalTests: { type: Number, default: 0 },
+    totalTests: { type: Number, default: 0 },
     commitSha: { type: String, default: null },
     duration: { type: Number, default: null },
     startedAt: { type: Date, default: Date.now },
