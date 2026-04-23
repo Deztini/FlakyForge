@@ -91,4 +91,43 @@ export const FlakyTestService = {
       },
     };
   },
+
+  async getFlakyTestMetrics(userId: string) {
+    const result = await TestRun.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          status: "completed",
+        },
+      },
+      { $unwind: "$flakyTests" },
+      { $match: { "flakyTests.isFlaky": true } },
+      {
+        $group: {
+          _id: "$flakyTests.status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counts = result.reduce(
+      (acc, item) => {
+        acc[item._id] = item.count;
+        return acc;
+      },
+      { unfixed: 0, pending: 0, fixed: 0 },
+    );
+
+    const total = counts.unfixed + counts.pending + counts.fixed;
+
+    const fixRate = total > 0 ? Math.round((counts.fixed / total) * 100) : 0;
+
+    return {
+      total,
+      fixed: counts.fixed,
+      pending: counts.pending,
+      unfixed: counts.unfixed,
+      fixRate,
+    };
+  },
 };
