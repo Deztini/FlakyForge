@@ -1,0 +1,25 @@
+export function getWeekStart(date = new Date()) {
+  const d = new Date(date);
+  const day = d.getDay();
+
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const weekStart = new Date(d.setDate(diff));
+
+  weekStart.setHours(0, 0, 0, 0);
+  return weekStart;
+}
+
+export function getWeekRanges() {
+  const thisWeekStart = getWeekStart();
+
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+
+  const lastWeekEnd = new Date(thisWeekStart);
+
+  return {
+    thisWeekStart,
+    lastWeekStart,
+    lastWeekEnd
+  };
+}
