@@ -17,8 +17,13 @@ export function getWeekRanges() {
 
   const lastWeekEnd = new Date(thisWeekStart);
 
+  const thisWeekEnd = new Date(thisWeekStart);
+  thisWeekEnd.setDate(thisWeekEnd.getDate() + 7);
+
+
   return {
     thisWeekStart,
+    thisWeekEnd,
     lastWeekStart,
     lastWeekEnd
   };
