@@ -243,4 +243,64 @@ export const DashboardService = {
 
     return trends;
   },
+
+  async getRootCauseBreakdown(userId: string) {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const breakdown = await TestRun.aggregate([
+      {
+        $match: {
+          userId: userObjectId,
+          status: "completed",
+        },
+      },
+
+      { $unwind: "$flakyTests" },
+
+      {
+        $match: {
+          "flakyTests.flakyType": { $exists: true, $ne: null },
+        },
+      },
+
+      {
+        $group: {
+          _id: "$flakyTests.flakyType",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const total = breakdown.reduce((sum, item) => sum + item.count, 0);
+
+    if (total === 0) {
+      return {
+        total: 0,
+        breakdown: [
+          { type: "async wait", count: 0, percentage: 0 },
+          { type: "concurrency", count: 0, percentage: 0 },
+          { type: "network", count: 0, percentage: 0 },
+        ],
+      };
+    }
+
+    const CATEGORIES = ["async wait", "concurrency", "network"];
+
+    const countMap: Record<string, number> = {};
+
+    for (const item of breakdown) {
+      countMap[item._id] = item.count;
+    }
+
+    const result = CATEGORIES.map((category) => {
+      const count = countMap[category];
+      const percentage = Math.round((count / total) * 100);
+      return { type: category, count, percentage };
+    });
+
+    return {
+      total,
+      breakdown: result,
+    };
+  },
 };
