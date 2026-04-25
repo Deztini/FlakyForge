@@ -34,4 +34,22 @@ export const DashboardController = {
       next(err);
     }
   },
+
+  async getRootCauseBreakdown(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user as IUser;
+
+      const result = await DashboardService.getRootCauseBreakdown(
+        user._id.toString(),
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Flaky test root cause breakdown fetched successfully",
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
