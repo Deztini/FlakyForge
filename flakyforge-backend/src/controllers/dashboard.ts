@@ -18,4 +18,20 @@ export const DashboardController = {
       next(err);
     }
   },
+
+  async getFlakyTestTrend(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user as IUser;
+
+      const result = await DashboardService.getTrend(user._id.toString());
+
+      return res.status(200).json({
+        success: true,
+        message: "Flaky test trend fetched successfully",
+        data: { result },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
