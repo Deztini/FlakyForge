@@ -165,4 +165,82 @@ export const DashboardService = {
       },
     };
   },
+
+  async getTrend(userId: string) {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const { thisWeekStart, thisWeekEnd } = getWeekRanges();
+
+    const [detectedRaw, fixedRaw] = await Promise.all([
+      TestRun.aggregate([
+        {
+          $match: {
+            userId: userObjectId,
+            status: "completed",
+            createdAt: { $gte: thisWeekStart, $lt: thisWeekEnd },
+          },
+        },
+
+        {
+          $group: {
+            _id: { $daysOfWeek: "$createdAt" },
+            detected: { $sum: "$flakyCount" },
+          },
+        },
+      ]),
+
+      TestRun.aggregate([
+        {
+          $match: {
+            userId: userObjectId,
+            status: "completed",
+            createdAt: { $gte: thisWeekStart, $lt: thisWeekEnd },
+          },
+        },
+
+        { $unwind: "$flakyTests" },
+
+        {
+          $match: {
+            "flakyTests.status": "fixed",
+          },
+        },
+
+        {
+          $group: {
+            _id: { $daysOfWeek: "$createdAt" },
+            fixed: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const DAY_MAP: Record<number, string> = {
+      2: "Mon",
+      3: "Tue",
+      4: "Wed",
+      5: "Thur",
+      6: "Fri",
+      7: "Sat",
+      1: "Sun",
+    };
+
+    const detectedMap: Record<number, number> = {};
+
+    for (const item of detectedRaw) {
+      detectedMap[item._id] = item.detected;
+    }
+
+    const fixedMap: Record<number, number> = {};
+    for (const item of fixedRaw) {
+      fixedMap[item._id] = item.fixed;
+    }
+
+    const trends = [2, 3, 4, 5, 6, 7, 1].map((dayNum) => ({
+      day: DAY_MAP[dayNum],
+      detected: detectedMap[dayNum] ?? 0,
+      fixed: fixedMap[dayNum] ?? 0,
+    }));
+
+    return trends;
+  },
 };
