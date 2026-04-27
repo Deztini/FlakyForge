@@ -182,7 +182,7 @@ export const DashboardService = {
 
         {
           $group: {
-            _id: { $daysOfWeek: "$createdAt" },
+            _id: { $dayOfWeek: "$createdAt" },
             detected: { $sum: "$flakyCount" },
           },
         },
@@ -207,7 +207,7 @@ export const DashboardService = {
 
         {
           $group: {
-            _id: { $daysOfWeek: "$createdAt" },
+            _id: { $dayOfWeek: "$createdAt" },
             fixed: { $sum: 1 },
           },
         },
