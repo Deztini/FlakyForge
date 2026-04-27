@@ -11,3 +11,5 @@ router.get("/flaky-tests/trends", authenticate, DashboardController.getFlakyTest
 
 
 router.get("/flaky-tests/root-cause", authenticate, DashboardController.getRootCauseBreakdown);
+
+export default router;
