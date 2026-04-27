@@ -28,7 +28,7 @@ export const DashboardController = {
       return res.status(200).json({
         success: true,
         message: "Flaky test trend fetched successfully",
-        data: { result },
+        data: { trends: result },
       });
     } catch (err) {
       next(err);
