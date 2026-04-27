@@ -46,7 +46,7 @@ export const dashboardApi = {
 
   async getTrends(): Promise<TrendDay[]> {
     const { data } = await api.get(`${BASE_URL}/dashboard/flaky-tests/trends`);
-    return data.data;
+    return data.data.trends;
   },
 
   async getRootCauseBreakdown(): Promise<RootCauseBreakdown> {
