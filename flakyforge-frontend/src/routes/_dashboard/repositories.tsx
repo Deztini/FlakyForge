@@ -73,7 +73,9 @@ function RepositoryPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const [selectedRepo, setSelectedRepo] = useState<ConnectedRepo | null>(null);
-  const { data: repos, isLoading, isError } = useConnectedRepos();
+  const { data, isLoading, isError } = useConnectedRepos();
+
+  const repos = data?.repos ?? [];
 
   const triggerScan = useTriggerScan();
 
