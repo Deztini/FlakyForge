@@ -56,11 +56,7 @@ export const AuthService = {
     if (!user) {
       throw ApiError.notFound("No account found with this email");
     }
-
-    if (user.isVerified) {
-      throw ApiError.badRequest("This account is already verified");
-    }
-
+    
     const otp = generateOtp();
 
     await Otp.deleteMany({ email });
