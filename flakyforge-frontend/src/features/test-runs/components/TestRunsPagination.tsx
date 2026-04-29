@@ -2,11 +2,13 @@ import type { TestRunsResponse } from "../../../api/testRunApi";
 
 type TestRunsPaginationProps = {
   pagination: TestRunsResponse["pagination"];
+  actualCount: number;
   onPageChange: (page: number) => void;
 };
 
 export function TestRunsPagination({
   pagination,
+  actualCount,
   onPageChange,
 }: TestRunsPaginationProps) {
 
@@ -24,7 +26,7 @@ export function TestRunsPagination({
   return (
     <div className="flex items-center justify-between">
       <div className="text-[#94A3B8] text-[13px]">
-        Showing {pagination.limit} of {pagination.total} test runs
+        Showing {actualCount} of {pagination.total} test runs
       </div>
       <div className="flex items-center gap-2">
         <button

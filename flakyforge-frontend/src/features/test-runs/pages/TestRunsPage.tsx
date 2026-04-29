@@ -24,7 +24,6 @@ export function TestRunsPage() {
   return (
     <AuthGuard>
       <div className="space-y-6">
-
         <TestRunsStatCards
           isLoading={metricsLoading}
           isError={metricsError}
@@ -32,13 +31,13 @@ export function TestRunsPage() {
         />
 
         {runsLoading && (
-          <div className="flex items-center justify-center py-24">
+          <div className="flex items-center justify-center py-48">
             <Loader2 className="w-8 h-8 text-[#6C63FF] animate-spin" />
           </div>
         )}
 
         {runsError && (
-          <div className="flex items-center justify-center py-24 gap-3 text-[#EF4444]">
+          <div className="flex items-center justify-center py-48 gap-3 text-[#EF4444]">
             <AlertCircle className="w-5 h-5" />
             <span className="text-[14px]">
               Failed to load test runs. Please try again.
@@ -48,22 +47,25 @@ export function TestRunsPage() {
 
         {!runsLoading && !runsError && testRunsData && (
           <>
-            <div className="space-y-3">
-              {testRunsData.testRuns.length === 0 ? (
-                <div className="text-center text-[#94A3B8] text-[14px] py-24">
-                  No test runs found.
+            {testRunsData.testRuns.length === 0 ? (
+              <div className="text-center text-[#94A3B8] text-[14px] py-48">
+                No test runs found.
+              </div>
+            ) : (
+              <>
+                <div className="space-y-3">
+                  {testRunsData.testRuns.map((run) => (
+                    <TestRunCard key={run._id} run={run} />
+                  ))}
                 </div>
-              ) : (
-                testRunsData.testRuns.map((run) => (
-                  <TestRunCard key={run._id} run={run} />
-                ))
-              )}
-            </div>
 
-            <TestRunsPagination
-              pagination={testRunsData.pagination}
-              onPageChange={setCurrentPage}
-            />
+                <TestRunsPagination
+                  pagination={testRunsData.pagination}
+                  actualCount={testRunsData.testRuns.length}
+                  onPageChange={setCurrentPage}
+                />
+              </>
+            )}
           </>
         )}
       </div>
