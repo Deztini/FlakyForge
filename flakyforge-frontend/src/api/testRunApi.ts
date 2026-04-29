@@ -11,9 +11,9 @@ export interface TestRun {
     language: string | null;
   };
   status: "pending" | "running" | "completed" | "failed";
-  triggeredBy: "push" | "manual" | "scheduled";
+  triggeredBy: "workflow_dispatch" | "push" | "pull_request" | "scheduled";
   commitSha?: string;
-  duration?: number; 
+  duration?: number;
   flakyCount: number;
   totalTests: number;
   startedAt: string;
@@ -37,7 +37,7 @@ export interface TestRunMetrics {
   totalRuns: number;
   runsToday: number;
   successRate: number;
-  avgDuration: number; 
+  avgDuration: number;
 }
 
 export const testRunApi = {
@@ -48,7 +48,7 @@ export const testRunApi = {
     });
 
     const { data } = await api.get(
-      `${BASE_URL}/test-runs?${params.toString()}`
+      `${BASE_URL}/test-runs?${params.toString()}`,
     );
     return data.data;
   },
