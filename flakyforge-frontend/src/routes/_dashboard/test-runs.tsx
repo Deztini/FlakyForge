@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react";
 import { Card } from "../../components/Card";
 import { AuthGuard } from "../../components/guards/AuthGuard";
+import { TestRunsPage } from "../../features/test-runs/pages/TestRunsPage";
 
 const testRuns = [
   {
@@ -142,10 +143,10 @@ const testRunStatistics = [
 ];
 
 export const Route = createFileRoute("/_dashboard/test-runs")({
-  component: testRunPage,
+  component: TestRunsPage,
 });
 
-function testRunPage() {
+function testRunPages() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
