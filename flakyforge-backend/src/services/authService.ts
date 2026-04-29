@@ -23,7 +23,7 @@ export const AuthService = {
   async signup(input: SignupInput) {
     const existingUser = await User.findOne({ email: input.email });
     if (existingUser) {
-      throw ApiError.badRequest("Account already exists");
+      throw ApiError.badRequest("Something went wrong");
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 12);
@@ -36,8 +36,6 @@ export const AuthService = {
     });
 
     const otp = generateOtp();
-
-    await Otp.deleteMany({ email: input.email });
 
     await Otp.create({
       email: input.email,
