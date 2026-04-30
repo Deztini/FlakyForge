@@ -37,7 +37,7 @@ export function FlakyTestsTable({
   onPageChange,
 }: FlakyTestsTableProps) {
   return (
-    <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
+    <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden mt-14">
 
       <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
         <div>
