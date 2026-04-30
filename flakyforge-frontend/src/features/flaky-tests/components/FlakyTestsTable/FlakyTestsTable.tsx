@@ -1,10 +1,13 @@
 import { Filter, Download } from "lucide-react";
 import { Loader2, AlertCircle } from "lucide-react";
-import type { FlakyTestStatus, FlakyTestsResponse, FlakyTestMetrics } from "../../../../api/flakyTestApi";
+import type {
+  FlakyTestStatus,
+  FlakyTestsResponse,
+  FlakyTestMetrics,
+} from "../../../../api/flakyTestApi";
 import { FlakyTestsFilters } from "./FlakyTestsFilters";
 import { FlakyTestsRow } from "./FlakyTestsRow";
 import { FlakyTestsPagination } from "./FlakyTestsPagination";
-
 
 const TABLE_HEADERS = [
   { label: "Test Name", align: "text-left" },
@@ -20,6 +23,7 @@ const TABLE_HEADERS = [
 type FlakyTestsTableProps = {
   isLoading: boolean;
   isError: boolean;
+  actualCount: number;
   data?: FlakyTestsResponse;
   metrics?: FlakyTestMetrics;
   activeFilter: FlakyTestStatus | undefined;
@@ -32,13 +36,13 @@ export function FlakyTestsTable({
   isError,
   data,
   metrics,
+  actualCount,
   activeFilter,
   onFilterChange,
   onPageChange,
 }: FlakyTestsTableProps) {
   return (
     <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden mt-14">
-
       <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
         <div>
           <h3 className="text-white text-[16px] font-semibold">
@@ -95,7 +99,9 @@ export function FlakyTestsTable({
                 <td colSpan={8}>
                   <div className="flex items-center justify-center py-16 gap-2 text-[#EF4444]">
                     <AlertCircle className="w-4 h-4" />
-                    <span className="text-[13px]">Failed to load flaky tests.</span>
+                    <span className="text-[13px]">
+                      Failed to load flaky tests.
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -109,6 +115,7 @@ export function FlakyTestsTable({
 
       {data && (
         <FlakyTestsPagination
+          actualCount={actualCount}
           pagination={data.pagination}
           onPageChange={onPageChange}
         />

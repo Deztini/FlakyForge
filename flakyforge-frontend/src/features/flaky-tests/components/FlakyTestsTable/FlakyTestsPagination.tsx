@@ -3,17 +3,19 @@ import { Button } from "../../../../components/Button";
 
 type FlakyTestsPaginationProps = {
   pagination: FlakyTestsResponse["pagination"];
+  actualCount: number;
   onPageChange: (page: number) => void;
 };
 
 export function FlakyTestsPagination({
   pagination,
+  actualCount,
   onPageChange,
 }: FlakyTestsPaginationProps) {
   return (
     <div className="p-4 flex items-center justify-between border-t border-[#1E2139]">
       <div className="text-[#94A3B8] text-[13px]">
-        Showing {pagination.limit} of {pagination.total} flaky tests
+        Showing {actualCount} of {pagination.total} flaky tests
       </div>
       <div className="flex items-center gap-2">
         <Button

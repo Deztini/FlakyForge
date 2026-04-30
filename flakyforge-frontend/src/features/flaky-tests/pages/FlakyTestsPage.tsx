@@ -41,9 +41,11 @@ export function FlakyTestsPage() {
           isError={testsError}
           data={flakyTestsData}
           metrics={metrics}
+          actualCount={flakyTestsData?.flakyTests.length ?? 0}
           activeFilter={activeFilter}
           onFilterChange={handleFilterChange}
           onPageChange={setCurrentPage}
+          
         />
       </div>
     </AuthGuard>
