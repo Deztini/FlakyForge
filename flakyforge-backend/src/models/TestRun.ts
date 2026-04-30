@@ -84,6 +84,13 @@ const TestRunSchema = new Schema<ITestRun>(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id.toString();
+        delete (ret as any)._id;
+        delete (ret as any)._v;
+      },
+    },
   },
 );
 

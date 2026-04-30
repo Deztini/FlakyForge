@@ -44,10 +44,19 @@ const RepositorySchema = new Schema<IRepository>(
       type: String,
       required: true,
       unique: true,
-      select: false
-    }
+      select: false,
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id.toString();
+        delete (ret as any)._id;
+        delete (ret as any)._v;
+      },
+    },
+  },
 );
 
 export const Repository = mongoose.model<IRepository>(
