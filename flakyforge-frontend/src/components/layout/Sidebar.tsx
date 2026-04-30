@@ -10,34 +10,31 @@ import {
 import { Logo } from "../Logo";
 import { useNavigate, useLocation, Link } from "@tanstack/react-router";
 import { Button } from "../Button";
+import { useFlakyTestMetrics } from "../../hooks/useFlakyTests";
 
 const navItems = [
   {
     icon: LayoutDashboard,
     label: "Dashboard",
     path: "/dashboard",
-    badge: null,
   },
   {
     icon: FolderGit2,
     label: "Repositories",
     path: "/repositories",
-    badge: null,
   },
   {
     icon: AlertCircle,
     label: "Flaky Tests",
     path: "/flaky-tests",
-    badge: "12",
   },
-  { icon: PlayCircle, label: "Test Runs", path: "/test-runs", badge: null },
+  { icon: PlayCircle, label: "Test Runs", path: "/test-runs" },
   {
     icon: GitPullRequest,
     label: "Pull Requests",
     path: "/pull-requests",
-    badge: null,
   },
-  { icon: Settings, label: "Settings", path: "/settings", badge: null },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 interface SidebarUserProps {
@@ -56,7 +53,7 @@ function NavItem({
   label,
   path,
   badge,
-}: (typeof navItems)[number]) {
+}: (typeof navItems)[number] & { badge?: number | null }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = location.pathname === path;
@@ -72,9 +69,9 @@ function NavItem({
     >
       <Icon className="w-4.5 h-4.5" />
       <span className="text-[14px] flex-1 text-left">{label}</span>
-      {badge && (
+      {badge != null && badge > 0 && (
         <span className="h-5 px-2 bg-[#F59E0B] text-[#0F1117] rounded-full text-[11px] font-semibold flex items-center justify-center">
-          {badge}
+          {badge > 99 ? "99+" : badge}
         </span>
       )}
     </button>
@@ -106,7 +103,9 @@ function SidebarUser({ name, role, initials, onLogout }: SidebarUserProps) {
 }
 
 export function Sidebar({ user }: SidebarProps) {
-  console.log(user);
+  const { data: flakyMetrics } = useFlakyTestMetrics();
+
+  const unfixedCount = flakyMetrics?.breakdown.unfixed ?? null;
   return (
     <aside className="w-60 bg-[#1A1D27] border-r border-[#1E2139] flex flex-col">
       <div className="p-6">
@@ -123,7 +122,11 @@ export function Sidebar({ user }: SidebarProps) {
         </div>
         <div className="space-y-0.5">
           {navItems.map((item) => (
-            <NavItem key={item.label} {...item} />
+            <NavItem
+              key={item.label}
+              {...item}
+              badge={item.label === "Flaky Tests" ? unfixedCount : null}
+            />
           ))}
         </div>
       </nav>
