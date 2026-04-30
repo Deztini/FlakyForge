@@ -3,9 +3,9 @@ import { api } from "../lib/api";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface TestRun {
-  _id: string;
+  id: string;
   repositoryId: {
-    _id: string;
+    id: string;
     fullName: string;
     branch: string;
     language: string | null;

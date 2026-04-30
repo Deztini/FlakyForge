@@ -12,7 +12,8 @@ export interface AvailableRepo {
 }
 
 export interface ConnectedRepo {
-  _id: string;
+  id: string;
+  userId: string;
   fullName: string;
   githubRepoId: number;
   language: string | null;
@@ -25,6 +26,18 @@ export interface ConnectedRepo {
   fixedCount: number;
   lastScannedAt?: string;
   createdAt: string;
+}
+
+export interface ConnectedRepoResponse {
+  repos: ConnectedRepo[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export interface ConnectRepoPayload {
@@ -43,8 +56,15 @@ export const repoApi = {
     return data.data;
   },
 
-  async getConnected(): Promise<ConnectedRepo[]> {
-    const { data } = await api.get(`${BASE_URL}/repo`);
+  async getConnected(
+    page: number,
+    limit: number,
+  ): Promise<ConnectedRepoResponse> {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    const { data } = await api.get(`${BASE_URL}/repo?${params.toString()}`);
     return data.data;
   },
 
