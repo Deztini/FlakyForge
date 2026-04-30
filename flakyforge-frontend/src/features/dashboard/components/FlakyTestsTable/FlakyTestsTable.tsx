@@ -3,16 +3,28 @@ import { DashboardSectionError } from "../DashboardSectionError";
 import { FlakyTestsFilters } from "./FlakyTestsFilters";
 import { FlakyTestsPagination } from "./FlakyTestsPagination";
 import { FlakyTestsRow } from "./FlakyTestsRows";
+import type { FlakyTestStatus } from "../../../../api/flakyTestApi";
+import type { FlakyTestsResponse } from "../../../../api/flakyTestApi";
+
+type FlakyTestsTableProps = {
+  isLoading: boolean;
+  isError: boolean;
+  actualCount: number;
+  data?: FlakyTestsResponse;
+  activeFilter: FlakyTestStatus | undefined;
+  onFilterChange: (filter: FlakyTestStatus | undefined) => void;
+  onPageChange: (page: number) => void;
+};
 
 export function FlakyTestsTable({
-  flakyTestsData,
+  data,
   activeFilter,
   onFilterChange,
-  currentPage,
-  setCurrentPage,
+  actualCount,
+  onPageChange,
   isLoading,
   isError,
-}: any) {
+}: FlakyTestsTableProps) {
   return (
     <div className="bg-[#1A1D27] border border-[#1E2139] rounded-xl overflow-hidden">
       <div className="p-6 flex items-center justify-between border-b border-[#1E2139]">
@@ -28,59 +40,58 @@ export function FlakyTestsTable({
         />
       </div>
 
-
-        <table className="w-full">
-          <thead className="bg-[#0F1117]">
+      <table className="w-full">
+        <thead className="bg-[#0F1117]">
+          <tr>
+            {[
+              "Test Name",
+              "Repository",
+              "Cause",
+              "Confidence",
+              "Status",
+              "Action",
+            ].map((h) => (
+              <th
+                key={h}
+                className={`text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5 ${
+                  h === "Test Name" || h === "Repository"
+                    ? "text-left"
+                    : "text-center"
+                } ${h === "Action" ? "text-right" : ""}`}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {isLoading && (
             <tr>
-              {[
-                "Test Name",
-                "Repository",
-                "Cause",
-                "Confidence",
-                "Status",
-                "Action",
-              ].map((h) => (
-                <th
-                  key={h}
-                  className={`text-[#94A3B8] text-[12px] font-semibold px-4 py-2.5 ${
-                    h === "Test Name" || h === "Repository"
-                      ? "text-left"
-                      : "text-center"
-                  } ${h === "Action" ? "text-right" : ""}`}
-                >
-                  {h}
-                </th>
-              ))}
+              <td colSpan={6}>
+                <DashboardSectionLoader />
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr>
-                <td colSpan={6}>
-                  <DashboardSectionLoader />
-                </td>
-              </tr>
-            )}
+          )}
 
-            {isError && (
-              <tr>
-                <td colSpan={6}>
-                  <DashboardSectionError message="Failed to load tests" />
-                </td>
-              </tr>
-            )}
+          {isError && (
+            <tr>
+              <td colSpan={6}>
+                <DashboardSectionError message="Failed to load tests" />
+              </td>
+            </tr>
+          )}
 
-            {!isLoading && !isError && flakyTestsData && (
-              <FlakyTestsRow flakyTestsData={flakyTestsData} />
-            )}
-          </tbody>
-        </table>
-    
-      {flakyTestsData && (
+          {!isLoading && !isError && data && (
+            <FlakyTestsRow tests={data.flakyTests} />
+          )}
+        </tbody>
+      </table>
+
+      {data && (
         <FlakyTestsPagination
-          flakyTestsData={flakyTestsData}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
+          actualCount={actualCount}
+          pagination={data.pagination}
+          onPageChange={onPageChange}
         />
       )}
     </div>

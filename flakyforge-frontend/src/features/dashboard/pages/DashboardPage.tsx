@@ -5,7 +5,7 @@ import {
   useRootCauseBreakdown,
 } from "../../../hooks/useDashboard";
 import { useFlakyTests } from "../../../hooks/useFlakyTests";
-
+import type { FlakyTestStatus } from "../../../api/flakyTestApi";
 import { SummaryCards } from "../components/SummaryCards";
 import { TrendsChart } from "../components/TrendsChart";
 import { RootCauseChart } from "../components/RootCauseChart";
@@ -13,7 +13,9 @@ import { FlakyTestsTable } from "../components/FlakyTestsTable/FlakyTestsTable";
 import { AuthGuard } from "../../../components/guards/AuthGuard";
 
 export function DashboardPage() {
-  const [activeFilter, setActiveFilter] = useState();
+  const [activeFilter, setActiveFilter] = useState<FlakyTestStatus | undefined>(
+    undefined,
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const {
@@ -36,6 +38,11 @@ export function DashboardPage() {
     isLoading: flakyTestsLoading,
     isError: flakyTestsError,
   } = useFlakyTests(currentPage, 5, activeFilter);
+
+  function handleFilterChange(filter: FlakyTestStatus | undefined) {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  }
 
   return (
     <AuthGuard>
@@ -60,13 +67,13 @@ export function DashboardPage() {
       </div>
 
       <FlakyTestsTable
-        flakyTestsData={flakyTestsData}
+        data={flakyTestsData}
         isLoading={flakyTestsLoading}
         isError={flakyTestsError}
         activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
+        actualCount={flakyTestsData?.flakyTests.length ?? 0}
+        onFilterChange={handleFilterChange}
+        onPageChange={setCurrentPage}
       />
     </AuthGuard>
   );
