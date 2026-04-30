@@ -1,19 +1,17 @@
-import type { TestRunMetrics } from "../../../api/testRunApi";
-import { formatAvgDuration, formatSuccessRate } from "../utils";
+import type { ConnectedRepo } from "../../../api/repoApi";
 import { Card } from "../../../components/Card";
 
-type TestRunsStatCardsProps = {
+type RepoStatCardsProps = {
   isLoading: boolean;
   isError: boolean;
-  metrics?: TestRunMetrics;
+  repos?: ConnectedRepo[];
 };
 
-
-export function TestRunsStatCards({
+export function RepoStatCards({
   isLoading,
   isError,
-  metrics,
-}: TestRunsStatCardsProps) {
+  repos,
+}: RepoStatCardsProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -31,44 +29,40 @@ export function TestRunsStatCards({
     );
   }
 
-  if (isError || !metrics) {
+  if (isError || !repos) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="col-span-4 text-center text-[#EF4444] text-[13px] py-6">
-          Failed to load test run metrics.
+          Failed to load repository stats.
         </div>
       </div>
     );
   }
 
-  const cards = [
+  const stats = [
+    { title: "Total Repositories", value: repos?.length ?? 0 },
     {
-      title: "Total Runs",
-      value: metrics.totalRuns.toLocaleString(),
+      title: "Active Scans",
+      value: repos?.filter((r) => r.status === "scanning").length ?? 0,
     },
     {
-      title: "Runs Today",
-      value: metrics.runsToday,
+      title: "Total Flaky Tests",
+      value: repos?.reduce((sum, r) => sum + r.flakyCount, 0) ?? 0,
     },
     {
-      title: "Success Rate",
-      value: formatSuccessRate(metrics.successRate),
-    },
-    {
-      title: "Avg Duration",
-      value: formatAvgDuration(metrics.avgDuration),
+      title: "Total Fixed",
+      value: repos?.reduce((sum, r) => sum + r.fixedCount, 0) ?? 0,
     },
   ];
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {cards.map((card) => (
+      {stats.map((stat) => (
         <Card
-          key={card.title}
+          key={stat.title}
           className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-5"
         >
-          <div className="text-[#94A3B8] text-[13px] mb-2">{card.title}</div>
-          <div className="text-white text-[32px] font-bold">{card.value}</div>
+          <div className="text-[#94A3B8] text-[13px] mb-2">{stat.title}</div>
+          <div className="text-white text-[32px] font-bold">{stat.value}</div>
         </Card>
       ))}
     </div>
