@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run generate:router && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate": "tanstack-router generate"
+    "generate:router": "tanstack-router build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
