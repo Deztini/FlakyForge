@@ -12,40 +12,12 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import type { ConnectedRepo } from "../../../api/repoApi";
+import { formatScanTrigger } from "../utils";
+import { RepoDetailRow } from "./RepoDetailRow";
 
 interface RepoDetailsModalProps {
   repo: ConnectedRepo | null;
   onClose: () => void;
-}
-
-function formatScanTrigger(trigger: ConnectedRepo["scanTrigger"]): string {
-  const map: Record<ConnectedRepo["scanTrigger"], string> = {
-    push: "On Push",
-    pull_request: "On Pull Request",
-    scheduled: "Scheduled",
-    workflow_dispatch: "Manual",
-  };
-  return map[trigger];
-}
-
-function DetailRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between py-3 border-b border-[#1E2139] last:border-0">
-      <div className="flex items-center gap-2 text-[#94A3B8] text-[13px]">
-        {icon}
-        {label}
-      </div>
-      <div className="text-white text-[13px] font-medium">{value}</div>
-    </div>
-  );
 }
 
 export function RepoDetailsModal({ repo, onClose }: RepoDetailsModalProps) {
@@ -110,17 +82,17 @@ export function RepoDetailsModal({ repo, onClose }: RepoDetailsModalProps) {
         </div>
 
         <div className="px-6 py-2">
-          <DetailRow
+          <RepoDetailRow
             icon={<GitBranch className="w-4 h-4" />}
             label="Branch"
             value={repo.branch}
           />
-          <DetailRow
+          <RepoDetailRow
             icon={<Zap className="w-4 h-4" />}
             label="Scan Trigger"
             value={formatScanTrigger(repo.scanTrigger)}
           />
-          <DetailRow
+          <RepoDetailRow
             icon={<ShieldCheck className="w-4 h-4" />}
             label="Auto Fix PRs"
             value={
@@ -131,7 +103,7 @@ export function RepoDetailsModal({ repo, onClose }: RepoDetailsModalProps) {
               )
             }
           />
-          <DetailRow
+          <RepoDetailRow
             icon={
               repo.status === "scanning" ? (
                 <Loader2 className="w-4 h-4 animate-spin text-[#F59E0B]" />
@@ -152,7 +124,7 @@ export function RepoDetailsModal({ repo, onClose }: RepoDetailsModalProps) {
               )
             }
           />
-          <DetailRow
+          <RepoDetailRow
             icon={<Calendar className="w-4 h-4" />}
             label="Last Scan"
             value={
@@ -163,7 +135,7 @@ export function RepoDetailsModal({ repo, onClose }: RepoDetailsModalProps) {
                 : "Never"
             }
           />
-          <DetailRow
+          <RepoDetailRow
             icon={<Calendar className="w-4 h-4" />}
             label="Connected"
             value={format(new Date(repo.createdAt), "MMM d, yyyy")}
