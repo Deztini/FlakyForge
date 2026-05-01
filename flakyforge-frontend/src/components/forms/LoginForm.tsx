@@ -11,6 +11,7 @@ import {
   loginSchema,
   type LoginFormData,
 } from "../../lib/validations/auth.schema";
+import { useState } from "react";
 
 export function LoginForm() {
   const {
@@ -25,9 +26,11 @@ export function LoginForm() {
     },
   });
 
+  const [isGithubLoading, setIsGithubLoading] = useState(false);
+
   const loginMutation = useLogin();
 
-  const { login: githubLogin } = useGithubLogin();
+  const { login: githubLogin, } = useGithubLogin();
 
   const errorMessage = loginMutation.error
     ? getErrorMessage(loginMutation.error)
@@ -38,6 +41,7 @@ export function LoginForm() {
   };
 
   const handleGithubLogin = () => {
+    setIsGithubLoading(true);
     githubLogin();
   };
 
@@ -65,6 +69,8 @@ export function LoginForm() {
 
           <Button
             handleClick={handleGithubLogin}
+            isLoading={isGithubLoading}
+            disabled={isGithubLoading}
             leftIcon={<Github className="w-5 h-5 text-white" />}
             className="w-full h-13 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-[10px] flex items-center justify-center gap-3 mb-6"
           >
