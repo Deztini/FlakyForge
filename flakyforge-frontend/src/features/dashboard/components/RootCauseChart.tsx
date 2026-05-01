@@ -46,7 +46,7 @@ export function RootCauseChart({
           </ResponsiveContainer>
 
           <div className="mt-4 space-y-2">
-            {rootCause.breakdown.map((entry, index) => (
+            {rootCause.breakdown.map((entry: any, index: number) => (
               <div
                 key={entry.type}
                 className="flex items-center justify-between"
@@ -56,7 +56,6 @@ export function RootCauseChart({
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: PIE_COLORS[index] }}
                   />
-                  {/* Capitalize first letter of each word for display */}
                   <span className="text-white text-[13px] capitalize">
                     {entry.type}
                   </span>

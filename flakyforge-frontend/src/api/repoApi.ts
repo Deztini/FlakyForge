@@ -2,6 +2,7 @@ import { api } from "../lib/api";
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface AvailableRepo {
+  id: string;
   githubRepoId: number;
   fullName: string;
   language: string | null;
