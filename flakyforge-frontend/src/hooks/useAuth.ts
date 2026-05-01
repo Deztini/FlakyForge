@@ -20,10 +20,10 @@ export const useSignup = () => {
 
   return useMutation({
     mutationFn: authApi.signup,
-    onSuccess: (data) => {
+    onSuccess: (_, variables) => {
       router.navigate({
         to: "/verify-otp",
-        search: { email: data.email },
+        search: { email: variables.email, purpose: "verify" },
       });
     },
     onError: (error) => {

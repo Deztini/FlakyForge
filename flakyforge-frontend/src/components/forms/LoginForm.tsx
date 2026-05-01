@@ -117,12 +117,11 @@ export function LoginForm() {
 
             <Button
               type="submit"
+              isLoading={isSubmitting || loginMutation.isPending}
               disabled={isSubmitting || loginMutation.isPending}
               className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-lg text-white text-[15px] font-medium mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting || loginMutation.isPending
-                ? "Sign in..."
-                : "Sign in"}
+              Sign in
             </Button>
           </form>
 

@@ -24,7 +24,6 @@ export function ResetPasswordForm() {
     },
   });
 
-
   const resetMutation = useResetPassword();
 
   const errorMessage = resetMutation.error
@@ -41,7 +40,6 @@ export function ResetPasswordForm() {
   return (
     <div className="min-h-screen w-full bg-[#0F1117] flex items-center justify-center p-4">
       <div className="flex flex-col items-center w-full max-w-100">
-
         <div className="mb-8 text-center">
           <div className="flex justify-center mb-3">
             <Logo size="md" />
@@ -90,12 +88,11 @@ export function ResetPasswordForm() {
 
             <Button
               type="submit"
+              isLoading={isSubmitting || resetMutation.isPending}
               disabled={isSubmitting || resetMutation.isPending}
               className="w-full h-11 bg-[#6C63FF] hover:bg-[#5B52E8] transition-colors rounded-lg text-white text-[15px] font-medium mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting || resetMutation.isPending
-                ? "Resetting..."
-                : "Reset password"}
+              Reset password
             </Button>
           </form>
 
@@ -112,7 +109,6 @@ export function ResetPasswordForm() {
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );

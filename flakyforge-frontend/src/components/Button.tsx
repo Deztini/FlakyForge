@@ -30,16 +30,22 @@ export function Button({
       type={type}
       onClick={handleClick}
       disabled={isDisabled}
-      className={`rounded-lg cursor-pointer ${className}`}
+      className={`relative flex items-center justify-center gap-2 rounded-lg cursor-pointer ${className}`}
       {...props}
     >
-      {isLoading ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : (
-        leftIcon && <span className="shrink-0">{leftIcon}</span>
+      {isLoading && (
+        <Loader2 className="absolute w-4 h-4 text-white animate-spin" />
       )}
-      <span>{children}</span>
-      {!isLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
+      
+      <span
+        className={`flex items-center gap-2 ${
+          isLoading ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        {leftIcon && <span className="shrink-0">{leftIcon}</span>}
+        <span>{children}</span>
+        {rightIcon && <span className="shrink-0">{rightIcon}</span>}
+      </span>
     </button>
   );
 }
