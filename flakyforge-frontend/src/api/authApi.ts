@@ -36,7 +36,7 @@ export interface AuthUser {
 
 export interface LoginResponse {
   message: string;
-  user: AuthUser;
+  data: AuthUser;
 }
 
 export interface SignupResponse {

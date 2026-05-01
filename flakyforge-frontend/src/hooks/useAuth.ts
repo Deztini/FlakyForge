@@ -37,7 +37,7 @@ export const useVerifyOtp = () => {
 
   return useMutation({
     mutationFn: authApi.verifyOtp,
-     onSuccess: (_, variables) => {
+    onSuccess: (_, variables) => {
       const purpose = (variables as any).purpose;
 
       if (purpose === "reset") {
@@ -68,7 +68,7 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      setAuth(data.user);
+      setAuth(data.data);
       router.navigate({ to: "/dashboard" });
     },
     onError: (error) => {
