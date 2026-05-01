@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "generate:router": "tanstack-router generate",
-    "build": "npm run generate:router && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
