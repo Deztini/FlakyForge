@@ -1,7 +1,7 @@
 import { GitBranch, Plus } from "lucide-react";
 import { Button } from "../../../components/Button";
 
-export function EmptyState({ onConnect }: { onConnect: () => void }) {
+export function RepoEmptyState({ onConnect }: { onConnect: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 px-6">
       <div className="w-20 h-20 bg-[#6C63FF]/10 rounded-2xl flex items-center justify-center mb-6">

@@ -11,6 +11,10 @@ export interface AvailableRepo {
   description: string | null;
 }
 
+export interface AvailableRepoResponse {
+  repos: AvailableRepo[]
+}
+
 export interface ConnectedRepo {
   id: string;
   userId: string;
@@ -51,7 +55,7 @@ export interface ConnectRepoPayload {
 }
 
 export const repoApi = {
-  async getAvailable(): Promise<AvailableRepo[]> {
+  async getAvailable(): Promise<AvailableRepoResponse> {
     const { data } = await api.get(`${BASE_URL}/repo/available`);
     return data.data;
   },

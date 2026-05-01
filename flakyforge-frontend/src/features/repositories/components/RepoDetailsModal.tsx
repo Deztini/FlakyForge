@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
-import type { ConnectedRepo } from "../../api/repoApi";
+import type { ConnectedRepo } from "../../../api/repoApi";
 
 interface RepoDetailsModalProps {
   repo: ConnectedRepo | null;

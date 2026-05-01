@@ -14,10 +14,10 @@ const getErrorMessage = (error: unknown): string => {
   return "Something went wrong. Please try again.";
 };
 
-export const useConnectedRepos = () => {
+export const useConnectedRepos = (page: number, limit: number) => {
   return useQuery({
     queryKey: ["repos", "connected"],
-    queryFn: repoApi.getConnected,
+    queryFn: () => repoApi.getConnected(page, limit),
   });
 };
 

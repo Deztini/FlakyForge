@@ -55,7 +55,7 @@ export function TestRunsPage() {
               <>
                 <div className="space-y-3">
                   {testRunsData.testRuns.map((run) => (
-                    <TestRunCard key={run._id} run={run} />
+                    <TestRunCard key={run.id} run={run} />
                   ))}
                 </div>
 

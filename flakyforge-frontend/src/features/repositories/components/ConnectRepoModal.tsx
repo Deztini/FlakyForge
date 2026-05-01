@@ -8,9 +8,9 @@ import {
   ChevronRight,
   Loader2,
 } from "lucide-react";
-import { useAvailableRepos, useConnectRepo } from "../../hooks/useRepos";
-import type { AvailableRepo, ConnectRepoPayload } from "../../api/repoApi";
-import { getErrorMessage } from "../../hooks/useRepos";
+import { useAvailableRepos, useConnectRepo } from "../../../hooks/useRepos";
+import type { AvailableRepo, ConnectRepoPayload } from "../../../api/repoApi";
+import { getErrorMessage } from "../../../hooks/useRepos";
 
 interface Props {
   isOpen: boolean;
@@ -33,12 +33,14 @@ export function ConnectRepoModal({ isOpen, onClose }: Props) {
     autoFixPRs: false,
   });
 
-  const { data: availableRepos, isLoading } = useAvailableRepos(isOpen);
+  const { data, isLoading } = useAvailableRepos(isOpen);
   const { mutate: connectRepo, isPending, error } = useConnectRepo();
 
-  const filtered = availableRepos?.filter((r) =>
+  const filtered = data?.repos.filter((r) =>
     r.fullName.toLowerCase().includes(search.toLowerCase()),
   );
+
+
 
   const handleSelect = (repo: AvailableRepo) => {
     setSelected(repo);
