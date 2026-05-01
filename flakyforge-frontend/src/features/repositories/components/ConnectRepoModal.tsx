@@ -54,7 +54,7 @@ export function ConnectRepoModal({ isOpen, onClose }: Props) {
     connectRepo(
       {
         repoFullName: selected.fullName,
-        githubRepoId: selected.id,
+        githubRepoId: Number(selected.id),
         language: selected.language,
         stars: selected.stars,
         branch: config.branch,

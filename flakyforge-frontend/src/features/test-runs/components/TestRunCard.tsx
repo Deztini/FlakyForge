@@ -49,7 +49,7 @@ export function TestRunCard({ run }: TestRunCardProps) {
           </div>
 
           <div className="flex items-center gap-3 text-[#94A3B8] text-[13px]">
-            <span>Run ID: {run._id.slice(-8)}</span>
+            <span>Run ID: {run.id.slice(-8)}</span>
             <span>•</span>
             {run.commitSha && (
               <>

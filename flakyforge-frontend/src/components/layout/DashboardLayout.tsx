@@ -3,7 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { TopHeader } from "./TopHeader";
 import { useAuthStore } from "../../store/authStore";
 import { useLogout } from "../../hooks/useAuth";
-import { getErrorMessage } from "../../hooks/useAuth";
+
 
 interface DashboardLayoutProps {
   title: string;
@@ -15,9 +15,6 @@ export function DashboardLayout({ title, breadcrumb }: DashboardLayoutProps) {
   console.log(user);
   const logoutMutation = useLogout();
 
-  const errorMessage = logoutMutation.error
-    ? getErrorMessage(logoutMutation.error)
-    : null;
 
   const [lastName = "", firstName = ""] = user?.name?.split(" ") ?? [];
 
