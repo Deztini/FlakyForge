@@ -15,7 +15,7 @@ export interface LoginInput {
 export interface VerifyOtpInput {
   email: string;
   code: string;
-  purpose?: "verify" | "reset";
+  purpose: "verify" | "reset";
 }
 
 export interface ForgotPasswordInput {
