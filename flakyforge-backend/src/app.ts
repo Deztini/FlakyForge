@@ -19,7 +19,7 @@ app.use(
 
 app.use(express.json());
 
-// app.use(globalLimiter);
+app.use(globalLimiter);
 
 app.use(cookieParser());
 
