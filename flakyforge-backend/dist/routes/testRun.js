@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authenticate_1 = require("../middleware/authenticate");
+const testRun_1 = require("../controllers/testRun");
+const router = (0, express_1.Router)();
+router.post("/results", testRun_1.TestRunController.collectResults);
+router.get("/", authenticate_1.authenticate, testRun_1.TestRunController.getTestRuns);
+router.get("/metrics", authenticate_1.authenticate, testRun_1.TestRunController.getMetrics);
+router.post("/:repoId/trigger", authenticate_1.authenticate, testRun_1.TestRunController.triggerScan);
+exports.default = router;
