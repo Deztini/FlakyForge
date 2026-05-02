@@ -50,7 +50,7 @@ const RepositorySchema = new Schema<IRepository>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
+      transform(doc, ret: any) {
         ret.id = ret._id.toString();
         delete (ret as any)._id;
         delete (ret as any)._v;

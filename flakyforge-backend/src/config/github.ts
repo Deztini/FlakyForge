@@ -4,6 +4,7 @@ import { User } from "../models/User";
 import { env } from "./env";
 import { RefreshToken } from "../models/RefreshToken";
 import axios from "axios";
+import { Profile } from "passport-github2";
 
 passport.use(
   new GithubStrategy(
@@ -13,7 +14,7 @@ passport.use(
       callbackURL: `${env.BACKEND_URL}/api/auth/github/callback`,
       proxy: true,
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken: string, refreshToken: string, profile: Profile, done: (error: any, user?: any) => void) => {
       try {
         let email = profile.emails?.[0]?.value;
 

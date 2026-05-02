@@ -24,7 +24,7 @@ const UserSchema = new Schema<IUser>(
     githubAccessToken: { type: String },
     password: {
       type: String,
-      required: function () {
+      required: function (this: IUser) {
         return this.provider === "local";
       },
     },
