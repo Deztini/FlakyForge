@@ -24,5 +24,6 @@ export const env = {
   WEBHOOK_SECRET: process.env.WEBHOOK_SECRET!,
   NGROK_URL: process.env.NGROK_URL!,
 
-  CLASSIFIER_URL: process.env.CLASSIFIER_URL!
+  CLASSIFIER_URL: process.env.CLASSIFIER_URL!,
+  VERCEL_URL: process.env.VERCEL_URL!
 }
