@@ -244,3 +244,130 @@ const fixNetworkPlaywright = (code: string, changes: string[]): string => {
   return fixedCode;
 };
 
+
+
+const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
+  const { testCode, framework, testName } = input;
+  let fixedCode = testCode;
+  const changes: string[] = [];
+
+  const setTimeoutDelayPattern =
+    /await\s+new\s+Promise\(\s*resolve\s*=>\s*setTimeout\s*\(\s*resolve\s*,\s*\d+\s*\)\s*\)/g;
+
+  if (setTimeoutDelayPattern.test(fixedCode)) {
+    fixedCode = fixedCode.replace(setTimeoutDelayPattern, () => {
+      changes.push("Replaced arbitrary setTimeout delay with proper async wait");
+      return getProperWaitReplacement(framework);
+    });
+  }
+
+  const doneCallbackPattern = /\(\s*done\s*\)\s*=>\s*\{/g;
+
+  if (doneCallbackPattern.test(fixedCode)) {
+    fixedCode = fixedCode.replace(doneCallbackPattern, () => {
+      changes.push("Converted done-callback pattern to async/await");
+      return "async () => {";
+    });
+    fixedCode = fixedCode.replace(/\bdone\(\s*\)\s*;?/g, "");
+  }
+
+  if (
+    (framework === "jest" || framework === "vitest" || framework === "mocha") &&
+    !fixedCode.includes("waitFor")
+  ) {
+    const hasAsyncActivity =
+      fixedCode.includes("await") || fixedCode.includes(".then(");
+
+    if (hasAsyncActivity) {
+      fixedCode = fixedCode.replace(
+        /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));/g,
+        (match, indent, expectStatement) => {
+          if (
+            fixedCode.includes(
+              `waitFor(() => {\n${indent}${expectStatement}`
+            )
+          ) {
+            return match;
+          }
+          changes.push(
+            "Wrapped assertion in waitFor to handle async DOM updates"
+          );
+          return `${indent}await waitFor(() => {\n${indent}  ${expectStatement};\n${indent}});`;
+        }
+      );
+    }
+  }
+
+  if (framework === "playwright") {
+    fixedCode = fixedCode.replace(
+      /await\s+page\.waitForTimeout\s*\(\s*\d+\s*\)/g,
+      () => {
+        changes.push(
+          "Replaced page.waitForTimeout with page.waitForLoadState"
+        );
+        return "await page.waitForLoadState('networkidle')";
+      }
+    );
+  }
+
+  if (framework === "cypress") {
+    fixedCode = fixedCode.replace(
+      /cy\.wait\s*\(\s*\d+\s*\)/g,
+      () => {
+        changes.push(
+          "Replaced cy.wait(number) — update the TODO with your actual assertion"
+        );
+        return `/* TODO: replace with cy.get('[data-testid="..."]').should('be.visible') */`;
+      }
+    );
+  }
+
+  if (
+    changes.some((c) => c.includes("waitFor")) &&
+    (framework === "jest" || framework === "vitest") &&
+    !fixedCode.includes("waitFor")
+  ) {
+    fixedCode = addWaitForImport(fixedCode, framework);
+  }
+
+  return {
+    fixedCode,
+    explanation: buildExplanation(testName, "async wait", changes),
+  };
+};
+
+const fixNetwork = (input: RuleEngineInput): RuleEngineOutput => {
+  const { testCode, framework, testName } = input;
+  let fixedCode = testCode;
+  const changes: string[] = [];
+
+  if (framework === "jest" || framework === "vitest") {
+    fixedCode = fixNetworkJestVitest(fixedCode, framework, changes);
+  } else if (framework === "mocha") {
+    fixedCode = fixNetworkMocha(fixedCode, changes);
+  } else if (framework === "cypress") {
+    fixedCode = fixNetworkCypress(fixedCode, changes);
+  } else if (framework === "playwright") {
+    fixedCode = fixNetworkPlaywright(fixedCode, changes);
+  }
+
+  return {
+    fixedCode,
+    explanation: buildExplanation(testName, "network", changes),
+  };
+};
+
+
+export const RuleEngineService = {
+  applyFix(input: RuleEngineInput): RuleEngineOutput {
+    const { flakyType } = input;
+
+    if (flakyType === "async wait") return fixAsyncWait(input);
+    if (flakyType === "network") return fixNetwork(input);
+
+    return {
+      fixedCode: input.testCode,
+      explanation: `No fix rule matched for flaky type "${flakyType}". Manual review recommended.`,
+    };
+  },
+};
