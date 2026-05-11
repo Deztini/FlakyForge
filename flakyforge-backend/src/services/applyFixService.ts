@@ -74,11 +74,10 @@ export const ApplyFixService = {
     const { fixedCode, explanation } = RuleEngineService.applyFix({
       testCode: flakyTest.testCode,
       flakyType: flakyTest.flakyType as "async wait" | "network",
-      framework: repository.framework as any,
+      framework: repository.framework,
       testName: flakyTest.name,
     });
 
-    // If the rule engine produced no changes, there's nothing to PR
     if (fixedCode === flakyTest.testCode) {
       throw ApiError.unprocessable(
         "No automated fix could be applied to this test. Manual review required.",
@@ -87,26 +86,24 @@ export const ApplyFixService = {
 
     const fixBranch = `fix/flaky-${sanitizeBranchName(flakyTest.name)}`;
 
-    // Fetch the current file from GitHub — we need the content and sha for the commit
     const { content: originalContent, sha: fileSha } =
       await GithubService.getFileContent(
-        user.githubToken,
+        user.githubAccessToken,
         repository.fullName,
         flakyTest.file,
         repository.branch,
       );
 
-    // Create the fix branch off the repo's base branch
     await GithubService.createBranch(
-      user.githubToken,
+      user.githubAccessToken,
       repository.fullName,
       repository.branch,
       fixBranch,
     );
 
-    // Splice the fix into the file and commit it to the fix branch
+
     await GithubService.commitFix(
-      user.githubToken,
+      user.githubAccessToken,
       repository.fullName,
       flakyTest.file,
       originalContent,
@@ -116,9 +113,8 @@ export const ApplyFixService = {
       fileSha,
     );
 
-    // Open the pull request
     const { prNumber, prUrl } = await GithubService.openPullRequest(
-      user.githubToken,
+      user.githubAccessToken,
       repository.fullName,
       repository.branch,
       fixBranch,
@@ -126,8 +122,6 @@ export const ApplyFixService = {
       explanation,
     );
 
-    // Update the flaky test status using MongoDB's positional $ operator
-    // so we only touch the matching subdocument, not the whole array
     await TestRun.updateOne(
       {
         _id: testRunId,
