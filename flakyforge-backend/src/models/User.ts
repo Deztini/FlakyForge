@@ -21,7 +21,7 @@ const UserSchema = new Schema<IUser>(
       enum: ["local", "github"],
       default: "local",
     },
-    githubAccessToken: { type: String },
+    githubAccessToken: { type: String, select: false },
     password: {
       type: String,
       required: function (this: IUser) {
