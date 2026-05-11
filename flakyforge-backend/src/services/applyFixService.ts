@@ -60,19 +60,17 @@ export const ApplyFixService = {
 
     const repository = await Repository.findById(testRun.repositoryId);
     if (!repository) {
-      throw ApiError.notFound(404, "Repository not found");
+      throw ApiError.notFound("Repository not found");
     }
 
-    // .select("+githubToken") because the token is select: false on the User model
-    const user = await User.findById(userId).select("+githubToken");
-    if (!user || !user.githubToken) {
-      throw new ApiError(
-        401,
+
+    const user = await User.findById(userId).select("+githubAccessToken");
+    if (!user || !user.githubAccessToken) {
+      throw ApiError.unauthorized(
         "GitHub token not found. Please reconnect your GitHub account.",
       );
     }
 
-    // Run the rule engine — pure in-memory, no external calls
     const { fixedCode, explanation } = RuleEngineService.applyFix({
       testCode: flakyTest.testCode,
       flakyType: flakyTest.flakyType as "async wait" | "network",

@@ -14,6 +14,7 @@ export interface IRepository extends Document {
   flakyCount: number;
   fixedCount: number;
   lastScannedAt?: Date;
+  framework: "jest" | "vitest" | "mocha" | "cypress" | "playwright";
   apiKey: string;
 }
 
@@ -40,6 +41,11 @@ const RepositorySchema = new Schema<IRepository>(
     flakyCount: { type: Number, default: 0 },
     fixedCount: { type: Number, default: 0 },
     lastScannedAt: { type: Date },
+    framework: {
+      type: String,
+      enum: ["jest", "vitest", "mocha", "cypress", "playwright"],
+      default: "jest",
+    },
     apiKey: {
       type: String,
       required: true,
