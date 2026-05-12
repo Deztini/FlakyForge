@@ -132,6 +132,7 @@ export const ApplyFixService = {
           "flakyTests.$.status": "pending",
           "flakyTests.$.prNumber": prNumber,
           "flakyTests.$.prUrl": prUrl,
+          "flakyTests.$.explanation": explanation
         },
       },
     );
