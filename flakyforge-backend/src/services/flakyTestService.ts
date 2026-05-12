@@ -55,6 +55,7 @@ export const FlakyTestService = {
             detected: "$completedAt",
             repositoryId: "$repository._id",
             repositoryName: "$repository.fullName",
+            testRunId: { $toString: "$_id" },
           },
         },
       ]),
