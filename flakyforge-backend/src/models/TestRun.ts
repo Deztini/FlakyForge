@@ -13,6 +13,7 @@ interface IFlakyResult {
   status: "unfixed" | "pending" | "fixed";
   prNumber: number;
   prUrl: string;
+  explanation?: string;
 }
 
 export interface ITestRun extends Document {
@@ -48,6 +49,7 @@ const FlakyResultSchema = new Schema<IFlakyResult>({
   },
   prNumber: { type: Number, default: null },
   prUrl: { type: String, default: null },
+  explanation: { type: String, default: null },
 });
 
 const TestRunSchema = new Schema<ITestRun>(
