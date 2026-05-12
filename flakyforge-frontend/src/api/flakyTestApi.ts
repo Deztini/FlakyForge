@@ -5,6 +5,7 @@ export type FlakyTestStatus = "unfixed" | "pending" | "fixed";
 
 export interface FlakyTest {
   id: string;
+  testRunId: string;
   name: string;
   file: string;
   flakyType?: "async wait" | "concurrency" | "network";
@@ -44,11 +45,22 @@ export interface FlakyTestMetrics {
   };
 }
 
+export interface ApplyFixResponse {
+  prNumber: number;
+  prUrl: string;
+  fixBranch: string;
+}
+
+export interface ApplyFixInput {
+  testRunId: string;
+  flakyTestId: string;
+}
+
 export const flakyTestApi = {
   async getFlakyTests(
     page: number,
     limit: number,
-    status?: FlakyTestStatus
+    status?: FlakyTestStatus,
   ): Promise<FlakyTestsResponse> {
     const params = new URLSearchParams({
       page: String(page),
@@ -58,13 +70,20 @@ export const flakyTestApi = {
     if (status) params.append("status", status);
 
     const { data } = await api.get(
-      `${BASE_URL}/flaky-tests?${params.toString()}`
+      `${BASE_URL}/flaky-tests?${params.toString()}`,
     );
     return data.data;
   },
 
   async getMetrics(): Promise<FlakyTestMetrics> {
     const { data } = await api.get(`${BASE_URL}/flaky-tests/metrics`);
+    return data.data;
+  },
+
+  async applyFix(
+    input: ApplyFixInput
+  ): Promise<ApplyFixResponse> {
+    const { data } = await api.post(`${BASE_URL}/flaky-tests/apply-fix`, input);
     return data.data;
   },
 };
