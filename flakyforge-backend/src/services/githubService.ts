@@ -113,7 +113,7 @@ export const GithubService = {
     fullName: string,
     filePath: string,
     branch: string,
-  ): Promise<FileContent> {
+  ) {
     try {
       const { data } = await axios.get<GitHubFileResponse>(
         `${GITHUB_API}/repos/${fullName}/contents/${filePath}`,
@@ -137,7 +137,7 @@ export const GithubService = {
     fullName: string,
     baseBranch: string,
     newBranchName: string,
-  ): Promise<void> {
+  ) {
     try {
       const { data: refData } = await axios.get<{ object: { sha: string } }>(
         `${GITHUB_API}/repos/${fullName}/git/ref/heads/${baseBranch}`,
@@ -168,7 +168,7 @@ export const GithubService = {
     testName: string,
     branchName: string,
     fileSha: string,
-  ): Promise<void> {
+  ) {
     try {
       const updatedContent = spliceFixIntoFile(
         originalContent,
@@ -198,7 +198,7 @@ export const GithubService = {
     fixBranch: string,
     testName: string,
     explanation: string,
-  ): Promise<PullRequestResult> {
+  ) {
     try {
       const { data: pr } = await axios.post<{
         number: number;
@@ -220,6 +220,18 @@ export const GithubService = {
       };
     } catch (error) {
       return handleGithubError(error, "Failed to open pull request");
+    }
+  },
+
+  async getPullRequest(token: string, prNumber: number, fullName: string) {
+    try {
+      const { data } = await axios.get(
+        `${GITHUB_API}/repos/${fullName}/pulls/${prNumber}`,
+        { headers: buildHeaders(token) },
+      );
+      return data;
+    } catch (error) {
+      return handleGithubError(error, `Failed to fetch PR #${prNumber}`);
     }
   },
 };
