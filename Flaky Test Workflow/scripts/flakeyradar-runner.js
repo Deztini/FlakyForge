@@ -19,7 +19,7 @@ async function main () {
   const framework = detectFramework()
   console.log('Detected Framework: ', framework)
 
-  runTests(framework)
+  await runTests(framework)
 
   const filePath = fileMap[framework]
   const failedTest = parseTestResults(filePath, framework)
