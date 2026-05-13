@@ -1,7 +1,7 @@
-const fs = require("fs");
+const fs = require('fs')
 
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+function writeJSON (file, data) {
+  fs.writeFileSync(file, JSON.stringify(data, null, 2))
 }
 
-module.exports = { writeJSON };
+module.exports = { writeJSON }
