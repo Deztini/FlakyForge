@@ -195,7 +195,7 @@ export const RepoService = {
     });
 
     await Repository.findByIdAndUpdate(repoId, { status: "scanning" });
-
+   console.log("repo being scanned");
     return testRun;
   },
 
@@ -217,6 +217,7 @@ export const RepoService = {
       }[];
     },
   ) {
+    console.log("result collected");
     const repository = await Repository.findOne({ apiKey });
 
     if (!repository) throw ApiError.unauthorized("Invalid API key");
