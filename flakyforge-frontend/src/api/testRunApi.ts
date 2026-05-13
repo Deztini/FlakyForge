@@ -1,7 +1,5 @@
 import { api } from "../lib/api";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-
 export interface TestRun {
   id: string;
   repositoryId: {
@@ -48,13 +46,13 @@ export const testRunApi = {
     });
 
     const { data } = await api.get(
-      `${BASE_URL}/test-runs?${params.toString()}`,
+      `/test-runs?${params.toString()}`,
     );
     return data.data;
   },
 
   async getMetrics(): Promise<TestRunMetrics> {
-    const { data } = await api.get(`${BASE_URL}/test-runs/metrics`);
+    const { data } = await api.get(`/test-runs/metrics`);
     return data.data;
   },
 };
