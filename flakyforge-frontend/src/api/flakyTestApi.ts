@@ -1,5 +1,4 @@
 import { api } from "../lib/api";
-const BASE_URL = import.meta.env.VITE_API_URL;
 
 export type FlakyTestStatus = "unfixed" | "pending" | "fixed";
 
@@ -70,20 +69,20 @@ export const flakyTestApi = {
     if (status) params.append("status", status);
 
     const { data } = await api.get(
-      `${BASE_URL}/flaky-tests?${params.toString()}`,
+      `/flaky-tests?${params.toString()}`,
     );
     return data.data;
   },
 
   async getMetrics(): Promise<FlakyTestMetrics> {
-    const { data } = await api.get(`${BASE_URL}/flaky-tests/metrics`);
+    const { data } = await api.get(`/flaky-tests/metrics`);
     return data.data;
   },
 
   async applyFix(
     input: ApplyFixInput
   ): Promise<ApplyFixResponse> {
-    const { data } = await api.post(`${BASE_URL}/flaky-tests/apply-fix`, input);
+    const { data } = await api.post(`/flaky-tests/apply-fix`, input);
     return data.data;
   },
 };
