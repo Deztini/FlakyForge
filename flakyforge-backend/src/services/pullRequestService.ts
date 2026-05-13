@@ -122,4 +122,25 @@ export const PullRequestService = {
     };
 
   },
+
+  async getPullRequestMetrics(userId: string) {
+      const all = await this.getPullRequests(userId, 1, 9999);
+
+    const breakdown = all.pullRequests.reduce(
+      (acc, pr) => {
+        acc[pr.state] = (acc[pr.state] || 0) + 1;
+        return acc;
+      },
+      { open: 0, merged: 0, closed: 0 } as Record<string, number>
+    );
+
+    return {
+      total: all.pagination.total,
+      breakdown: {
+        open: breakdown.open,
+        merged: breakdown.merged,
+        closed: breakdown.closed,
+      },
+    };
+  }
 };
