@@ -1,5 +1,4 @@
 import { api } from "../lib/api";
-const BASE_URL = import.meta.env.VITE_API_URL;
 
 
 export interface DashboardSummary {
@@ -40,18 +39,18 @@ export interface RootCauseBreakdown {
 
 export const dashboardApi = {
   async getSummary(): Promise<DashboardSummary> {
-    const { data } = await api.get(`${BASE_URL}/dashboard/summary`);
+    const { data } = await api.get(`/dashboard/summary`);
     return data.data;
   },
 
   async getTrends(): Promise<TrendDay[]> {
-    const { data } = await api.get(`${BASE_URL}/dashboard/flaky-tests/trends`);
+    const { data } = await api.get(`/dashboard/flaky-tests/trends`);
     return data.data.trends;
   },
 
   async getRootCauseBreakdown(): Promise<RootCauseBreakdown> {
     const { data } = await api.get(
-      `${BASE_URL}/dashboard/flaky-tests/root-cause`
+      `/dashboard/flaky-tests/root-cause`
     );
     return data.data;
   },
