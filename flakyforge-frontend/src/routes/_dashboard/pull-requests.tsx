@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Card } from "../../components/Card";
 import { AuthGuard } from "../../components/guards/AuthGuard";
+import { PullRequestsPage } from "../../features/pull-requests/pages/PullRequestsPage";
 
 const pullRequests = [
   {
@@ -175,7 +176,7 @@ const prStatistics = [
 ];
 
 export const Route = createFileRoute("/_dashboard/pull-requests")({
-  component: pullRequestPage,
+  component: PullRequestsPage,
 });
 
 function pullRequestPage() {
