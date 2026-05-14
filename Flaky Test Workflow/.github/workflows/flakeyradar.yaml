@@ -17,8 +17,18 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies 
+        run: |
+         echo "Checking if repo uses npm workspaces"
+
+         if node -e "process.exit(require('./package.json').workspaces ? 0 : 1)"; then
+          echo "Workspaces detected -> installing with workspace support"
+          npm install --workspaces
+         else
+          echo "No workspaces → installing normally"
+          npm install
+         fi
+          
 
       - name: Run FlakeyRadar
         run: node scripts/flakeyradar-runner.js
