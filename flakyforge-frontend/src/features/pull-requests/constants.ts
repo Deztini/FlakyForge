@@ -1,4 +1,4 @@
-import type { PRState } from "../../../api/pullRequestApi";
+import type { PRState } from "../../api/pullRequestApi";
 
 export const STATE_BADGE_CLASSES: Record<PRState, string> = {
   open: "bg-[#22C55E]/20 text-[#22C55E]",
