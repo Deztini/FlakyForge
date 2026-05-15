@@ -17,18 +17,24 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies 
+      - name: Detect package manager and install deps
         run: |
-         echo "Checking if repo uses npm workspaces"
+         echo "Detecting package manager..."
 
-         if node -e "process.exit(require('./package.json').workspaces ? 0 : 1)"; then
-          echo "Workspaces detected -> installing with workspace support"
-          npm install --workspaces
+         if [ -f pnpm-lock.yaml ]; then
+          echo "PNPM project detected"
+          npm install -g pnpm
+          pnpm install
+
+         elif [ -f yarn.lock ]; then
+          echo "Yarn project detected"
+          npm install -g yarn
+          yarn install
+
          else
-          echo "No workspaces → installing normally"
+          echo "NPM project detected"
           npm install
          fi
-          
 
       - name: Run FlakeyRadar
         run: node scripts/flakeyradar-runner.js
@@ -37,7 +43,7 @@ jobs:
         run: |
           node -e "
             const fs = require('fs');
-            const results = JSON.parse(fs.readFileSync('flaky-results.json', 'utf-8'));
+            const data = JSON.parse(fs.readFileSync('flaky-results.json', 'utf-8'));
             const payload = {
               githubRepoId: parseInt('${{ github.repository_id }}'),
               repoFullName: '${{ github.repository }}',

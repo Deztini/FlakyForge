@@ -65,11 +65,8 @@ function getTotalTestCount (filePath, framework) {
   }
 
   if (framework === 'playwright') {
-    let count = 0
-    data.suites?.forEach((suite) => {
-      suite.specs?.forEach(() => count++)
-    })
-    return count
+    const stats = data.stats || {}
+    return (stats.expected || 0) + (stats.unexpected || 0) + (stats.skipped || 0)
   }
 
   return 0
@@ -134,24 +131,30 @@ function parseTestResults (filePath, framework) {
   if (framework === 'playwright') {
     const results = []
 
-    data.suites?.forEach((suite) => {
-      suite.specs?.forEach((spec) => {
-        spec.tests?.forEach((test) => {
-          test.results?.forEach((result) => {
-            if (result.status === 'failed') {
-              results.push({
-                id: crypto.randomUUID(),
-                name: spec.title,
-                message: result.error?.message || '',
-                file: spec.file,
-                testCode: extractTestCode(spec.file, spec.title),
-              })
-            }
+    function traverseSuites (suites) {
+      if (!suites) return
+      for (const suite of suites) {
+        if (suite.suites) traverseSuites(suite.suites)
+
+        suite.specs?.forEach((spec) => {
+          spec.tests?.forEach((test) => {
+            test.results?.forEach((result) => {
+              if (result.status === 'failed' || result.status === 'unexpected') {
+                results.push({
+                  id: crypto.randomUUID(),
+                  name: spec.title,
+                  message: result.error?.message || '',
+                  file: spec.file,
+                  testCode: extractTestCode(spec.file, spec.title),
+                })
+              }
+            })
           })
         })
-      })
-    })
+      }
+    }
 
+    traverseSuites(data.suites)
     return results
   }
 
