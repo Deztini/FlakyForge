@@ -1,7 +1,7 @@
 import { api } from "../lib/api";
 
 export interface TestRun {
-  id: string;
+  _id: string;
   repoId: string;
   repoFullName: string;
   repoBranch: string;
