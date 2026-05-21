@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IFlakyResult {
+  _id: mongoose.Types.ObjectId;
   id: string;
   name: string;
   failRate: number;
