@@ -48,6 +48,8 @@ export function FlakyTestsTable({
               "Repository",
               "Cause",
               "Confidence",
+              "Attempts",
+              "Detected",
               "Status",
               "Action",
             ].map((h) => (

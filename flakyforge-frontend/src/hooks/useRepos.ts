@@ -16,8 +16,9 @@ const getErrorMessage = (error: unknown): string => {
 
 export const useConnectedRepos = (page: number, limit: number) => {
   return useQuery({
-    queryKey: ["repos", "connected"],
+    queryKey: ["repos", "connected", page, limit],
     queryFn: () => repoApi.getConnected(page, limit),
+    refetchInterval: 20000
   });
 };
 

@@ -98,6 +98,11 @@ export const authApi = {
     return data;
   },
 
+  checkAuth: async (): Promise<AuthUser> => {
+    const { data } = await api.get("/auth/check");
+    return data.data.user;
+  },
+
   refresh: async (): Promise<RefreshResponse> => {
     const { data } = await api.post<RefreshResponse>("/auth/refresh");
     return data;

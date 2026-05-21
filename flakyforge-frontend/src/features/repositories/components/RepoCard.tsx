@@ -17,6 +17,8 @@ export function RepoCard({
   triggerScan,
   setSelectedRepo,
 }: RepoCardProps) {
+  const isCurrentRepoScanning =
+    triggerScan.isPending && triggerScan.variables === repo.id;
   return (
     <Card
       key={repo.id}
@@ -75,13 +77,13 @@ export function RepoCard({
 
       <div className="flex items-center gap-2">
         <Button
-          disabled={repo.status === "scanning" || triggerScan.isPending}
+          disabled={repo.status === "scanning" || isCurrentRepoScanning}
           onClick={() => triggerScan.mutate(repo.id)}
           className="flex-1 h-9 bg-[#6C63FF] text-white rounded-lg hover:bg-[#5B52E8] transition-colors text-[13px] font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {triggerScan.isPending ? (
+          {isCurrentRepoScanning ? (
             <>
-              <Loader2 className="w-3 h-3 text-[#fff] animate-spin" />
+              <Loader2 className="w-3 h-3 text-white animate-spin" />
             </>
           ) : (
             "Run Scan"

@@ -23,7 +23,7 @@ function StatusIcon({ status }: { status: TestRun["status"] }) {
 }
 
 export function TestRunCard({ run }: TestRunCardProps) {
-  const repo = run.repositoryId;
+
 
   return (
     <Card className="bg-[#1A1D27] border border-[#1E2139] rounded-xl p-6 hover:border-[#6C63FF]/50 transition-colors">
@@ -31,11 +31,11 @@ export function TestRunCard({ run }: TestRunCardProps) {
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
             <h3 className="text-white text-[16px] font-semibold">
-              {repo.fullName}
+              {run.repoFullName}
             </h3>
 
             <span className="px-2.5 py-0.5 bg-[#0F1117] border border-[#2D3148] rounded-full text-[#94A3B8] text-[11px]">
-              {repo.branch}
+              {run.repoBranch}
             </span>
 
             <span
@@ -49,7 +49,7 @@ export function TestRunCard({ run }: TestRunCardProps) {
           </div>
 
           <div className="flex items-center gap-3 text-[#94A3B8] text-[13px]">
-            <span>Run ID: {run.id.slice(-8)}</span>
+            <span>Run ID: {run._id.slice(-8)}</span>
             <span>•</span>
             {run.commitSha && (
               <>

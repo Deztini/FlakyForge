@@ -2,12 +2,10 @@ import { api } from "../lib/api";
 
 export interface TestRun {
   id: string;
-  repositoryId: {
-    id: string;
-    fullName: string;
-    branch: string;
-    language: string | null;
-  };
+  repoId: string;
+  repoFullName: string;
+  repoBranch: string;
+  repoLanguage: string | null
   status: "pending" | "running" | "completed" | "failed";
   triggeredBy: "workflow_dispatch" | "push" | "pull_request" | "scheduled";
   commitSha?: string;
@@ -45,9 +43,7 @@ export const testRunApi = {
       limit: String(limit),
     });
 
-    const { data } = await api.get(
-      `/test-runs?${params.toString()}`,
-    );
+    const { data } = await api.get(`/test-runs?${params.toString()}`);
     return data.data;
   },
 

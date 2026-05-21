@@ -1,11 +1,21 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { useCheckAuth } from "../hooks/useCheckAuth";
+import type { QueryClient } from "@tanstack/react-query";
 
-export const Route = createRootRoute({
-  component: () => (
+function RootComponent() {
+  useCheckAuth();
+
+  return (
     <>
       <Outlet />
       <TanStackRouterDevtools />
     </>
-  ),
-})
+  );
+}
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+  {
+    component: RootComponent,
+  },
+);
