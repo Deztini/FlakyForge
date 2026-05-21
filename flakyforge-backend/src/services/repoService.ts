@@ -259,7 +259,7 @@ export const RepoService = {
           totalTests: payload.totalTests,
           commitSha: payload.commitSha,
           duration,
-          flakyTests: normalizedResults,
+          flakyTests,
           completedAt: new Date(),
           status: "completed",
         },
