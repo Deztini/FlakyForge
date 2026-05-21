@@ -20,6 +20,7 @@ interface GitHubRepo {
 
 export const RepoService = {
   async getAvailableRepos(user: IUser) {
+    console.log(user);
     if (!user.githubAccessToken) {
       throw ApiError.badRequest(
         "No Github token found. Please logout and sign in with Github again",
@@ -195,7 +196,7 @@ export const RepoService = {
     });
 
     await Repository.findByIdAndUpdate(repoId, { status: "scanning" });
-   console.log("repo being scanned");
+    console.log("repo being scanned");
     return testRun;
   },
 
@@ -218,6 +219,10 @@ export const RepoService = {
     },
   ) {
     console.log("result collected");
+    const normalizedResults = payload.results.map((t) => ({
+      ...t,
+      name: t.name.trim(),
+    }));
     const repository = await Repository.findOne({ apiKey });
 
     if (!repository) throw ApiError.unauthorized("Invalid API key");
@@ -226,10 +231,10 @@ export const RepoService = {
       throw ApiError.badRequest("Repo ID mismatch");
     }
 
-    const flakyTests = payload.results.filter((t) => t.isFlaky);
+    const flakyTests = normalizedResults.filter((t) => t.isFlaky);
     const flakyCount = flakyTests.length;
 
-    const totalRuns = payload.results.reduce((sum, t) => sum + t.runs, 0);
+    const totalRuns = normalizedResults.reduce((sum, t) => sum + t.runs, 0);
 
     const pendingTestRun = await TestRun.findOne(
       { repositoryId: repository._id, status: "pending" },
@@ -244,6 +249,7 @@ export const RepoService = {
       (Date.now() - pendingTestRun.startedAt.getTime()) / 1000,
     );
 
+    console.log(flakyTests);
     const testRun = await TestRun.findOneAndUpdate(
       { repositoryId: repository._id, status: "pending" },
       {
@@ -253,7 +259,7 @@ export const RepoService = {
           totalTests: payload.totalTests,
           commitSha: payload.commitSha,
           duration,
-          flakyTests: payload.results,
+          flakyTests: normalizedResults,
           completedAt: new Date(),
           status: "completed",
         },
@@ -276,7 +282,8 @@ export const RepoService = {
     });
 
     if (flakyTests.length > 0) {
-      classifyAndUpdateTestRun(testRun._id.toString(), flakyTests);
+      console.log("flaky test collected and passed to the model");
+      classifyAndUpdateTestRun(testRun._id.toString(), testRun.flakyTests);
     }
 
     return testRun;
@@ -310,13 +317,18 @@ async function classifyAndUpdateTestRun(
     console.log(`Classifying ${flakyTests.length} flaky tests...`);
 
     const classificationMap = await ClassifierService.classifyFlakyTests(
-      flakyTests.map((t) => ({ id: t.id, testCode: t.testCode })),
+      flakyTests.map((t) => ({ id: t._id.toString(), testCode: t.testCode })),
     );
 
-    console.log(classificationMap);
+    console.log("Map keys:", [...classificationMap.keys()]);
+    console.log(
+      "Test _id:",
+      flakyTests[0]._id.toString(),
+      typeof flakyTests[0]._id,
+    );
 
     const updatedFlakyTests = flakyTests.map((test) => {
-      const classification = classificationMap.get(test.id);
+      const classification = classificationMap.get(test._id.toString());
       return {
         ...test,
         flakyType: classification?.label,

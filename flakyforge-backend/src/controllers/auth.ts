@@ -11,20 +11,26 @@ import { ApiError } from "../utils/ApiError";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import { RefreshToken } from "../models/RefreshToken";
 import { env } from "../config/env";
-import { User } from "../models/User";
+import { IUser, User } from "../models/User";
 import { verifyAccessToken } from "../utils/jwt";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? ("none" as const)
+      : ("lax" as const),
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 const ACCESS_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? ("none" as const)
+      : ("lax" as const),
   maxAge: 15 * 60 * 1000,
 };
 
@@ -186,7 +192,9 @@ export const AuthController = {
       res.cookie("refreshToken", refreshToken, COOKIE_OPTIONS);
       res.cookie("accessToken", accessToken, ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({ success: true, message: "Refresh successful", data: user });
+      res
+        .status(200)
+        .json({ success: true, message: "Refresh successful", data: user });
     } catch (err) {
       next(err);
     }
@@ -201,9 +209,31 @@ export const AuthController = {
       res.clearCookie("refreshToken", COOKIE_OPTIONS);
       res.clearCookie("accessToken", ACCESS_COOKIE_OPTIONS);
 
-      res.status(200).json({ success: true, message: "Logged out successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "Logged out successfully" });
     } catch (err) {
       next(err);
+    }
+  },
+
+  async checkAuth(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = req.user as IUser;
+      res.status(200).json({
+        success: true,
+        message: "Authenticated",
+        data: {
+          user: {
+            id: user._id.toString(),
+            name: user.fullName,
+            role: user.role,
+            email: user.email,
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
     }
   },
 };

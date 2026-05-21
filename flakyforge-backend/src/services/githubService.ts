@@ -107,6 +107,54 @@ const spliceFixIntoFile = (
   return `${before}\n${fixedCode.trim()}\n${after}`;
 };
 
+const createOrReplaceBranch = async (
+  token: string,
+  fullName: string,
+  branchName: string,
+  sha: string,
+) => {
+  try {
+    await axios.post(
+      `${GITHUB_API}/repos/${fullName}/git/refs`,
+      {
+        ref: `refs/heads/${branchName}`,
+        sha,
+      },
+      {
+        headers: buildHeaders(token),
+      },
+    );
+  } catch (error) {
+    if (
+      error instanceof AxiosError &&
+      error.response?.status === 422 &&
+      error.response?.data?.message === "Reference already exists"
+    ) {
+      await axios.delete(
+        `${GITHUB_API}/repos/${fullName}/git/refs/heads/${branchName}`,
+        {
+          headers: buildHeaders(token),
+        },
+      );
+
+      await axios.post(
+        `${GITHUB_API}/repos/${fullName}/git/refs`,
+        {
+          ref: `refs/heads/${branchName}`,
+          sha,
+        },
+        {
+          headers: buildHeaders(token),
+        },
+      );
+
+      return;
+    }
+
+    throw error;
+  }
+};
+
 export const GithubService = {
   async getFileContent(
     token: string,
@@ -146,16 +194,57 @@ export const GithubService = {
 
       const baseSha = refData.object.sha;
 
+      await this.createOrReplaceBranch(token, fullName, newBranchName, baseSha);
+    } catch (error) {
+      handleGithubError(error, `Failed to create branch "${newBranchName}"`);
+    }
+  },
+
+  async createOrReplaceBranch(
+    token: string,
+    fullName: string,
+    branchName: string,
+    sha: string,
+  ) {
+    try {
       await axios.post(
         `${GITHUB_API}/repos/${fullName}/git/refs`,
         {
-          ref: `refs/heads/${newBranchName}`,
-          sha: baseSha,
+          ref: `refs/heads/${branchName}`,
+          sha,
         },
-        { headers: buildHeaders(token) },
+        {
+          headers: buildHeaders(token),
+        },
       );
     } catch (error) {
-      handleGithubError(error, `Failed to create branch "${newBranchName}"`);
+      if (
+        error instanceof AxiosError &&
+        error.response?.status === 422 &&
+        error.response?.data?.message === "Reference already exists"
+      ) {
+        await axios.delete(
+          `${GITHUB_API}/repos/${fullName}/git/refs/heads/${branchName}`,
+          {
+            headers: buildHeaders(token),
+          },
+        );
+
+        await axios.post(
+          `${GITHUB_API}/repos/${fullName}/git/refs`,
+          {
+            ref: `refs/heads/${branchName}`,
+            sha,
+          },
+          {
+            headers: buildHeaders(token),
+          },
+        );
+
+        return;
+      }
+
+      throw error;
     }
   },
 

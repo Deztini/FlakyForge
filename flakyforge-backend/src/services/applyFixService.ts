@@ -33,14 +33,17 @@ export const ApplyFixService = {
     if (!testRun) {
       throw ApiError.notFound("Test run not found");
     }
+    console.log("test run found");
 
     const flakyTest = testRun.flakyTests.find(
-      (t) => t.id.toString() === flakyTestId,
+      (t) => t._id.toString() === flakyTestId,
     );
 
     if (!flakyTest) {
+      console.log("not found");
       throw ApiError.notFound("Flaky test not found in this test run");
     }
+    console.log("flaky test found");
 
     if (flakyTest.status === "pending" || flakyTest.status === "fixed") {
       throw ApiError.conflict(
@@ -63,6 +66,7 @@ export const ApplyFixService = {
       throw ApiError.notFound("Repository not found");
     }
 
+    console.log("repository  found");
 
     const user = await User.findById(userId).select("+githubAccessToken");
     if (!user || !user.githubAccessToken) {
@@ -70,12 +74,14 @@ export const ApplyFixService = {
         "GitHub token not found. Please reconnect your GitHub account.",
       );
     }
+   
+    const trimmedTestName = flakyTest.name.trim();
 
     const { fixedCode, explanation } = RuleEngineService.applyFix({
       testCode: flakyTest.testCode,
       flakyType: flakyTest.flakyType as "async wait" | "network",
       framework: repository.framework,
-      testName: flakyTest.name,
+      testName: trimmedTestName,
     });
 
     if (fixedCode === flakyTest.testCode) {
@@ -86,11 +92,18 @@ export const ApplyFixService = {
 
     const fixBranch = `fix/flaky-${sanitizeBranchName(flakyTest.name)}`;
 
+    const relativeFilePath = flakyTest.file.replace(
+      /^\/home\/runner\/work\/[^/]+\/[^/]+\//,
+      "",
+    );
+
+    console.log("rfp", relativeFilePath);
+
     const { content: originalContent, sha: fileSha } =
       await GithubService.getFileContent(
         user.githubAccessToken,
         repository.fullName,
-        flakyTest.file,
+        relativeFilePath,
         repository.branch,
       );
 
@@ -101,14 +114,13 @@ export const ApplyFixService = {
       fixBranch,
     );
 
-
     await GithubService.commitFix(
       user.githubAccessToken,
       repository.fullName,
-      flakyTest.file,
+      relativeFilePath,
       originalContent,
       fixedCode,
-      flakyTest.name,
+      trimmedTestName,
       fixBranch,
       fileSha,
     );
@@ -118,7 +130,7 @@ export const ApplyFixService = {
       repository.fullName,
       repository.branch,
       fixBranch,
-      flakyTest.name,
+      trimmedTestName,
       explanation,
     );
 
@@ -132,7 +144,7 @@ export const ApplyFixService = {
           "flakyTests.$.status": "pending",
           "flakyTests.$.prNumber": prNumber,
           "flakyTests.$.prUrl": prUrl,
-          "flakyTests.$.explanation": explanation
+          "flakyTests.$.explanation": explanation,
         },
       },
     );

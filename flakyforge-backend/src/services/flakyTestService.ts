@@ -38,11 +38,13 @@ export const FlakyTestService = {
         },
 
         { $unwind: "$repository" },
-
+        { $sort: { completedAt: -1 } }, 
+        { $skip: skip },
+        { $limit: limit },
         {
           $project: {
             _id: 0,
-            id: "$flakyTests.id",
+            id: { $toString: "$flakyTests._id" },
             name: "$flakyTests.name",
             file: "$flakyTests.file",
             flakyType: "$flakyTests.flakyType",

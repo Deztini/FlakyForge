@@ -2,6 +2,7 @@ import Router from "express";
 import passport from "passport";
 import { AuthController } from "../controllers/auth";
 import { authLimiter, globalLimiter } from "../middleware/rateLimiter";
+import { authenticate } from "../middleware/authenticate";
 
 const router = Router();
 
@@ -16,6 +17,8 @@ router.post("/login", authLimiter, AuthController.login);
 router.post("/forgot-password", authLimiter, AuthController.forgotPassword);
 
 router.post("/reset-password", authLimiter, AuthController.resetPassword);
+
+router.get("/check", authenticate, AuthController.checkAuth);
 
 router.get(
   "/github",

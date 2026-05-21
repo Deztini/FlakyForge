@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
-import { IUser } from "../models/User";
+import { IUser, User } from "../models/User";
 import { RepoService } from "../services/repoService";
 
 const connectRepoSchema = z.object({
@@ -19,7 +19,10 @@ export const RepoController = {
   async getAvailable(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user as IUser;
-      const repos = await RepoService.getAvailableRepos(user);
+      const selectedUser = await User.findById(user._id).select(
+        "+githubAccessToken",
+      );
+      const repos = await RepoService.getAvailableRepos(selectedUser!);
       res.status(200).json({
         success: true,
         message: "Available repositories fetched successfully",
@@ -33,15 +36,16 @@ export const RepoController = {
   async connect(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user as IUser;
+      const selectedUser = await User.findById(user._id).select(
+        "+githubAccessToken",
+      );
       const payload = connectRepoSchema.parse(req.body);
-      const repository = await RepoService.connectRepos(user, payload);
-      res
-        .status(201)
-        .json({
-          sucess: true,
-          message: "Repository connected successfully.",
-          data: { repository },
-        });
+      const repository = await RepoService.connectRepos(selectedUser!, payload);
+      res.status(201).json({
+        sucess: true,
+        message: "Repository connected successfully.",
+        data: { repository },
+      });
     } catch (err) {
       next(err);
     }
@@ -61,13 +65,11 @@ export const RepoController = {
         page,
         safeLimit,
       );
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Repositories fetched successfully",
-          data: result,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Repositories fetched successfully",
+        data: result,
+      });
     } catch (err) {
       next(err);
     }

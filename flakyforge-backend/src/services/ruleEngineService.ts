@@ -122,18 +122,19 @@ const buildExplanation = (
   );
 };
 
-
 const fixNetworkJestVitest = (
   code: string,
   framework: "jest" | "vitest",
-  changes: string[]
+  changes: string[],
 ): string => {
   let fixedCode = code;
   const mockPrefix = framework === "vitest" ? "vi" : "jest";
 
   const hasRealFetch = /\bfetch\s*\(\s*['"`]https?:\/\//g.test(fixedCode);
   const hasRealAxios =
-    /\baxios\.(get|post|put|delete|patch)\s*\(\s*['"`]https?:\/\//g.test(fixedCode);
+    /\baxios\.(get|post|put|delete|patch)\s*\(\s*['"`]https?:\/\//g.test(
+      fixedCode,
+    );
 
   const alreadyMocked =
     fixedCode.includes("jest.mock") ||
@@ -149,7 +150,7 @@ const fixNetworkJestVitest = (
         fixedCode,
         buildFetchMock(mockPrefix),
         changes,
-        "Added fetch mock to prevent real network calls"
+        "Added fetch mock to prevent real network calls",
       );
     }
 
@@ -158,17 +159,21 @@ const fixNetworkJestVitest = (
         fixedCode,
         buildAxiosMock(mockPrefix),
         changes,
-        "Added axios mock to prevent real network calls"
+        "Added axios mock to prevent real network calls",
       );
     }
   }
 
-  if (changes.length > 0 && !fixedCode.includes("afterEach") && !fixedCode.includes("afterAll")) {
+  if (
+    changes.length > 0 &&
+    !fixedCode.includes("afterEach") &&
+    !fixedCode.includes("afterAll")
+  ) {
     fixedCode = injectAfterLastTest(
       fixedCode,
       `\nafterEach(() => {\n  ${mockPrefix}.restoreAllMocks();\n});`,
       changes,
-      "Added afterEach cleanup to restore mocks between tests"
+      "Added afterEach cleanup to restore mocks between tests",
     );
   }
 
@@ -180,7 +185,9 @@ const fixNetworkMocha = (code: string, changes: string[]): string => {
 
   const hasRealFetch = /\bfetch\s*\(\s*['"`]https?:\/\//g.test(fixedCode);
   const hasRealAxios =
-    /\baxios\.(get|post|put|delete|patch)\s*\(\s*['"`]https?:\/\//g.test(fixedCode);
+    /\baxios\.(get|post|put|delete|patch)\s*\(\s*['"`]https?:\/\//g.test(
+      fixedCode,
+    );
   const alreadyMocked =
     fixedCode.includes("nock") || fixedCode.includes("sinon");
 
@@ -189,7 +196,7 @@ const fixNetworkMocha = (code: string, changes: string[]): string => {
       fixedCode,
       buildNockMock(),
       changes,
-      "Added nock interceptor to prevent real network calls"
+      "Added nock interceptor to prevent real network calls",
     );
   }
 
@@ -207,12 +214,14 @@ const fixNetworkCypress = (code: string, changes: string[]): string => {
     fixedCode = fixedCode.replace(
       /([ \t]*)(cy\.visit\s*\([^)]+\))/,
       (match, indent, visitCall) => {
-        changes.push("Added cy.intercept to stub network requests before cy.visit");
+        changes.push(
+          "Added cy.intercept to stub network requests before cy.visit",
+        );
         return (
           `${indent}cy.intercept('GET', '**/api/**', { statusCode: 200, body: {} }).as('apiCall');\n` +
           `${indent}${visitCall}`
         );
-      }
+      },
     );
   }
 
@@ -231,20 +240,18 @@ const fixNetworkPlaywright = (code: string, changes: string[]): string => {
       /([ \t]*)(await\s+page\.goto\s*\([^)]+\))/,
       (match, indent, gotoCall) => {
         changes.push(
-          "Added page.route to intercept network requests before navigation"
+          "Added page.route to intercept network requests before navigation",
         );
         return (
           `${indent}await page.route('**/api/**', route => route.fulfill({ status: 200, body: '{}' }));\n` +
           `${indent}${gotoCall}`
         );
-      }
+      },
     );
   }
 
   return fixedCode;
 };
-
-
 
 const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
   const { testCode, framework, testName } = input;
@@ -252,22 +259,22 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
   const changes: string[] = [];
 
   const setTimeoutDelayPattern =
-    /await\s+new\s+Promise\(\s*resolve\s*=>\s*setTimeout\s*\(\s*resolve\s*,\s*\d+\s*\)\s*\)/g;
+    /await\s+new\s+Promise\(\s*(\w+)\s*=>\s*setTimeout\s*\(\s*\1\s*,\s*[^)]+\)\s*\)/g;
 
-  if (setTimeoutDelayPattern.test(fixedCode)) {
-    fixedCode = fixedCode.replace(setTimeoutDelayPattern, () => {
-      changes.push("Replaced arbitrary setTimeout delay with proper async wait");
-      return getProperWaitReplacement(framework);
-    });
-  }
+  fixedCode = fixedCode.replace(setTimeoutDelayPattern, () => {
+    changes.push("Replaced arbitrary setTimeout delay with proper async wait");
+    return getProperWaitReplacement(framework);
+  });
 
   const doneCallbackPattern = /\(\s*done\s*\)\s*=>\s*\{/g;
+  const beforeDone = fixedCode;
 
-  if (doneCallbackPattern.test(fixedCode)) {
-    fixedCode = fixedCode.replace(doneCallbackPattern, () => {
-      changes.push("Converted done-callback pattern to async/await");
-      return "async () => {";
-    });
+  fixedCode = fixedCode.replace(doneCallbackPattern, () => {
+    changes.push("Converted done-callback pattern to async/await");
+    return "async () => {";
+  });
+
+  if (fixedCode !== beforeDone) {
     fixedCode = fixedCode.replace(/\bdone\(\s*\)\s*;?/g, "");
   }
 
@@ -280,20 +287,18 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
 
     if (hasAsyncActivity) {
       fixedCode = fixedCode.replace(
-        /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));/g,
+        /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));?/g,
         (match, indent, expectStatement) => {
           if (
-            fixedCode.includes(
-              `waitFor(() => {\n${indent}${expectStatement}`
-            )
+            fixedCode.includes(`waitFor(() => {\n${indent}${expectStatement}`)
           ) {
             return match;
           }
           changes.push(
-            "Wrapped assertion in waitFor to handle async DOM updates"
+            "Wrapped assertion in waitFor to handle async DOM updates",
           );
           return `${indent}await waitFor(() => {\n${indent}  ${expectStatement};\n${indent}});`;
-        }
+        },
       );
     }
   }
@@ -302,24 +307,19 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
     fixedCode = fixedCode.replace(
       /await\s+page\.waitForTimeout\s*\(\s*\d+\s*\)/g,
       () => {
-        changes.push(
-          "Replaced page.waitForTimeout with page.waitForLoadState"
-        );
+        changes.push("Replaced page.waitForTimeout with page.waitForLoadState");
         return "await page.waitForLoadState('networkidle')";
-      }
+      },
     );
   }
 
   if (framework === "cypress") {
-    fixedCode = fixedCode.replace(
-      /cy\.wait\s*\(\s*\d+\s*\)/g,
-      () => {
-        changes.push(
-          "Replaced cy.wait(number) — update the TODO with your actual assertion"
-        );
-        return `/* TODO: replace with cy.get('[data-testid="..."]').should('be.visible') */`;
-      }
-    );
+    fixedCode = fixedCode.replace(/cy\.wait\s*\(\s*\d+\s*\)/g, () => {
+      changes.push(
+        "Replaced cy.wait(number) — update the TODO with your actual assertion",
+      );
+      return `/* TODO: replace with cy.get('[data-testid="..."]').should('be.visible') */`;
+    });
   }
 
   if (
@@ -329,6 +329,8 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
   ) {
     fixedCode = addWaitForImport(fixedCode, framework);
   }
+
+  console.log(buildExplanation(testName, "async wait", changes));
 
   return {
     fixedCode,
@@ -356,7 +358,6 @@ const fixNetwork = (input: RuleEngineInput): RuleEngineOutput => {
     explanation: buildExplanation(testName, "network", changes),
   };
 };
-
 
 export const RuleEngineService = {
   applyFix(input: RuleEngineInput): RuleEngineOutput {

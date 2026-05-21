@@ -14,8 +14,26 @@ export const TestRunService = {
       TestRun.countDocuments({ userId }),
     ]);
 
+
+    const flattenedTestRuns = testRuns.map((run) => {
+      const runObj = run.toObject();
+      const { repositoryId, ...rest } = runObj;
+
+      return {
+        ...rest,
+        ...(repositoryId && typeof repositoryId === "object"
+          ? {
+              repoFullName: (repositoryId as any).fullName,
+              repoLanguage: (repositoryId as any).language,
+              repoBranch: (repositoryId as any).branch,
+              repoId: (repositoryId as any)._id,
+            }
+          : {}),
+      };
+    });
+
     const result = {
-      testRuns,
+      testRuns: flattenedTestRuns,
       pagination: {
         total,
         page,

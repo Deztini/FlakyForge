@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import z from "zod";
 import type { IUser } from "../models/User";
+import { User } from "../models/User";
 import { RepoService } from "../services/repoService";
 import { TestRunService } from "../services/testRunService";
 import { ApiError } from "../utils/ApiError";
@@ -31,8 +32,14 @@ export const TestRunController = {
   ) {
     try {
       const user = req.user as IUser;
+      const selectedUser = await User.findById(user._id).select(
+        "+githubAccessToken"
+      );
 
-      const testRun = await RepoService.triggerScan(req.params.repoId, user);
+      const testRun = await RepoService.triggerScan(
+        req.params.repoId,
+        selectedUser!,
+      );
 
       res.status(201).json({
         success: true,
@@ -94,13 +101,11 @@ export const TestRunController = {
     try {
       const user = req.user as IUser;
       const metrics = await TestRunService.getMetrics(user._id.toString());
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Metrics fetched successfully",
-          data: metrics,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Metrics fetched successfully",
+        data: metrics,
+      });
     } catch (err) {
       next(err);
     }
