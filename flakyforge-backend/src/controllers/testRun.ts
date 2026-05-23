@@ -33,7 +33,7 @@ export const TestRunController = {
     try {
       const user = req.user as IUser;
       const selectedUser = await User.findById(user._id).select(
-        "+githubAccessToken"
+        "+githubAccessToken",
       );
 
       const testRun = await RepoService.triggerScan(
@@ -56,6 +56,9 @@ export const TestRunController = {
     res: Response,
     next: NextFunction,
   ) {
+    console.log(" collectResults controller hit");
+    console.log("api key:", req.headers["x-api-key"]);
+    console.log("body keys:", Object.keys(req.body || {}));
     try {
       const apiKey = req.headers["x-api-key"] as string;
 

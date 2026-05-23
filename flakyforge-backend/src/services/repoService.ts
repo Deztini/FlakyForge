@@ -218,75 +218,83 @@ export const RepoService = {
       }[];
     },
   ) {
-    console.log("result collected");
-    const normalizedResults = payload.results.map((t) => ({
-      ...t,
-      name: t.name.trim(),
-    }));
-    const repository = await Repository.findOne({ apiKey });
+    try {
+      console.log("result collected");
+      const normalizedResults = payload.results.map((t) => ({
+        ...t,
+        name: t.name.trim(),
+      }));
+      const repository = await Repository.findOne({ apiKey });
 
-    if (!repository) throw ApiError.unauthorized("Invalid API key");
+      if (!repository) throw ApiError.unauthorized("Invalid API key");
 
-    if (repository.githubRepoId !== payload.githubRepoId) {
-      throw ApiError.badRequest("Repo ID mismatch");
-    }
+      if (repository.githubRepoId !== payload.githubRepoId) {
+        throw ApiError.badRequest("Repo ID mismatch");
+      }
 
-    const flakyTests = normalizedResults.filter((t) => t.isFlaky);
-    const flakyCount = flakyTests.length;
+      const flakyTests = normalizedResults.filter((t) => t.isFlaky);
+      const flakyCount = flakyTests.length;
 
-    const totalRuns = normalizedResults.reduce((sum, t) => sum + t.runs, 0);
+      const totalRuns = normalizedResults.reduce((sum, t) => sum + t.runs, 0);
 
-    const pendingTestRun = await TestRun.findOne(
-      { repositoryId: repository._id, status: "pending" },
-      null,
-      { sort: { startedAt: -1 } },
-    );
+      const pendingTestRun = await TestRun.findOne(
+        { repositoryId: repository._id, status: "pending" },
+        null,
+        { sort: { startedAt: -1 } },
+      );
 
-    if (!pendingTestRun)
-      throw ApiError.notFound("No pending test run found for this repo");
+      if (!pendingTestRun)
+        throw ApiError.notFound("No pending test run found for this repo");
 
-    const duration = Math.floor(
-      (Date.now() - pendingTestRun.startedAt.getTime()) / 1000,
-    );
+      const duration = Math.floor(
+        (Date.now() - pendingTestRun.startedAt.getTime()) / 1000,
+      );
 
-    console.log(flakyTests);
-    const testRun = await TestRun.findOneAndUpdate(
-      { repositoryId: repository._id, status: "pending" },
-      {
+      console.log(flakyTests);
+      const testRun = await TestRun.findOneAndUpdate(
+        { repositoryId: repository._id, status: "pending" },
+        {
+          $set: {
+            flakyCount,
+            totalRuns,
+            totalTests: payload.totalTests,
+            commitSha: payload.commitSha,
+            duration,
+            flakyTests,
+            completedAt: new Date(),
+            status: "completed",
+          },
+        },
+        {
+          new: true,
+          sort: { startedAt: -1 },
+        },
+      );
+
+      if (!testRun)
+        throw ApiError.notFound("No pending test run found for this repo");
+
+      await Repository.findByIdAndUpdate(repository._id, {
         $set: {
           flakyCount,
-          totalRuns,
-          totalTests: payload.totalTests,
-          commitSha: payload.commitSha,
-          duration,
-          flakyTests,
-          completedAt: new Date(),
-          status: "completed",
+          lastScannedAt: new Date(),
+          status: "active",
         },
-      },
-      {
-        new: true,
-        sort: { startedAt: -1 },
-      },
-    );
+      });
 
-    if (!testRun)
-      throw ApiError.notFound("No pending test run found for this repo");
+      if (flakyTests.length > 0) {
+        console.log("flaky test collected and passed to the model");
+        await classifyAndUpdateTestRun(
+          testRun._id.toString(),
+          testRun.flakyTests,
+        );
+      }
 
-    await Repository.findByIdAndUpdate(repository._id, {
-      $set: {
-        flakyCount,
-        lastScannedAt: new Date(),
-        status: "active",
-      },
-    });
-
-    if (flakyTests.length > 0) {
-      console.log("flaky test collected and passed to the model");
-      classifyAndUpdateTestRun(testRun._id.toString(), testRun.flakyTests);
+      return testRun;
+    } catch (err) {
+      console.error("collectResults error:", err);
+      throw err;
     }
-
-    return testRun;
   },
 
   async updateScanCounts(
@@ -320,25 +328,32 @@ async function classifyAndUpdateTestRun(
       flakyTests.map((t) => ({ id: t._id.toString(), testCode: t.testCode })),
     );
 
-    console.log("Map keys:", [...classificationMap.keys()]);
-    console.log(
-      "Test _id:",
-      flakyTests[0]._id.toString(),
-      typeof flakyTests[0]._id,
-    );
+    console.log("Classification map size:", classificationMap.size);
 
-    const updatedFlakyTests = flakyTests.map((test) => {
+    for (const test of flakyTests) {
       const classification = classificationMap.get(test._id.toString());
-      return {
-        ...test,
-        flakyType: classification?.label,
-        confidence: classification?.confidence,
-      };
-    });
+      if (!classification) {
+        console.log(`No classification found for test ${test._id}`);
+        continue;
+      }
 
-    await TestRun.findByIdAndUpdate(testRunId, {
-      $set: { flakyTests: updatedFlakyTests },
-    });
+      await TestRun.updateOne(
+        {
+          _id: testRunId,
+          "flakyTests._id": test._id,
+        },
+        {
+          $set: {
+            "flakyTests.$.flakyType": classification.label,
+            "flakyTests.$.confidence": classification.confidence,
+          },
+        },
+      );
+
+      console.log(
+        `Updated test ${test._id} → ${classification.label} (${classification.confidence})`,
+      );
+    }
 
     console.log(`Classification complete for test run ${testRunId}`);
   } catch (err) {
