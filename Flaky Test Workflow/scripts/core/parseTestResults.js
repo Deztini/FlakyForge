@@ -3,7 +3,12 @@ const crypto = require('crypto')
 
 function readJSON (filePath) {
   try {
-    const raw = fs.readFileSync(filePath, 'utf-8')
+    let raw = fs.readFileSync(filePath, 'utf-8')
+    const jsonStart = raw.indexOf('{')
+    const jsonEnd = raw.lastIndexOf('}')
+    if (jsonStart > -1 && jsonEnd > -1) {
+      raw = raw.slice(jsonStart, jsonEnd + 1)
+    }
     return JSON.parse(raw)
   } catch {
     console.log(`Failed to read/parse ${filePath}`)
@@ -96,7 +101,7 @@ function parseTestResults (filePath, framework) {
     return (
       data.testResults?.flatMap((suite) =>
         suite.assertionResults
-          ?.filter((t) => t.status === 'fail')
+          ?.filter((t) => t.status === 'failed')
           .map((t) => ({
             id: crypto.randomUUID(),
             name: t.fullName,
