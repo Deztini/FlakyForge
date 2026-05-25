@@ -44,6 +44,7 @@ jobs:
           node -e "
             const fs = require('fs');
             const data = JSON.parse(fs.readFileSync('flaky-results.json', 'utf-8'));
+            console.log(data);
             const payload = {
               githubRepoId: parseInt('${{ github.repository_id }}'),
               repoFullName: '${{ github.repository }}',
