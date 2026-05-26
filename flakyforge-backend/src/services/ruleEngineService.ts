@@ -1,4 +1,10 @@
 type FlakyType = "async wait" | "network";
+type AsyncSubType =
+  | "setTimeout"
+  | "done callback"
+  | "real timing"
+  | "shared state"
+  | "waitFor wrap";
 type Framework = "jest" | "vitest" | "mocha" | "cypress" | "playwright";
 
 interface RuleEngineInput {
