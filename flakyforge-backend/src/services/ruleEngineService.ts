@@ -5,7 +5,7 @@ type AsyncSubType =
   | "real timing"
   | "shared state"
   | "waitFor wrap";
-type Framework = "jest" | "vitest" | "mocha" | "cypress" | "playwright";
+export type Framework = "jest" | "vitest" | "mocha" | "cypress" | "playwright";
 
 interface RuleEngineInput {
   testCode: string;
@@ -66,7 +66,7 @@ const injectBeforeFirstTest = (
   return injection + "\n\n" + code;
 };
 
-const injectAfterLastTest = (
+export const injectAfterLastTest = (
   code: string,
   injection: string,
   changes: string[],
