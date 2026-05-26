@@ -1,3 +1,5 @@
+import { isSingleLineBalanced } from "../analyzer/isSingleLineBalanced";
+
 type FlakyType = "async wait" | "network";
 type AsyncSubType =
   | "setTimeout"
@@ -5,7 +7,7 @@ type AsyncSubType =
   | "real timing"
   | "shared state"
   | "waitFor wrap";
-export type Framework = "jest" | "vitest" | "mocha" | "cypress" | "playwright";
+export type Framework = "jest" | "vitest";
 
 interface RuleEngineInput {
   testCode: string;
@@ -19,17 +21,11 @@ interface RuleEngineOutput {
   explanation: string;
 }
 
-const getProperWaitReplacement = (framework: Framework): string => {
+export const getProperWaitReplacement = (framework: Framework): string => {
   switch (framework) {
     case "jest":
     case "vitest":
       return "await waitFor(() => {})";
-    case "mocha":
-      return "await new Promise(resolve => setImmediate(resolve))";
-    case "playwright":
-      return "await page.waitForLoadState('networkidle')";
-    case "cypress":
-      return "/* cy commands are already queued — remove this delay */";
   }
 };
 
@@ -186,76 +182,50 @@ const fixNetworkJestVitest = (
   return fixedCode;
 };
 
-const fixNetworkMocha = (code: string, changes: string[]): string => {
-  let fixedCode = code;
-
-  const hasRealFetch = /\bfetch\s*\(\s*['"`]https?:\/\//g.test(fixedCode);
-  const hasRealAxios =
-    /\baxios\.(get|post|put|delete|patch)\s*\(\s*['"`]https?:\/\//g.test(
-      fixedCode,
-    );
-  const alreadyMocked =
-    fixedCode.includes("nock") || fixedCode.includes("sinon");
-
-  if ((hasRealFetch || hasRealAxios) && !alreadyMocked) {
-    fixedCode = injectBeforeFirstTest(
-      fixedCode,
-      buildNockMock(),
-      changes,
-      "Added nock interceptor to prevent real network calls",
-    );
+const fixWaitForWrapping = (
+  code: string,
+  framework: Framework,
+  changes: string[],
+): string => {
+  if (
+    framework !== "jest" &&
+    framework !== "vitest" &&
+    framework !== "mocha"
+  ) {
+    return code;
   }
-
-  return fixedCode;
-};
-
-const fixNetworkCypress = (code: string, changes: string[]): string => {
+ 
+  if (code.includes("waitFor")) return code;
+ 
+  const hasAsyncActivity =
+    code.includes("await") || code.includes(".then(");
+ 
+  if (!hasAsyncActivity) return code;
+ 
   let fixedCode = code;
-
-  const alreadyIntercepted = fixedCode.includes("cy.intercept");
-  const hasNavigation =
-    fixedCode.includes("cy.visit") || fixedCode.includes("cy.request");
-
-  if (hasNavigation && !alreadyIntercepted) {
-    fixedCode = fixedCode.replace(
-      /([ \t]*)(cy\.visit\s*\([^)]+\))/,
-      (match, indent, visitCall) => {
-        changes.push(
-          "Added cy.intercept to stub network requests before cy.visit",
-        );
-        return (
-          `${indent}cy.intercept('GET', '**/api/**', { statusCode: 200, body: {} }).as('apiCall');\n` +
-          `${indent}${visitCall}`
-        );
-      },
-    );
-  }
-
-  return fixedCode;
-};
-
-const fixNetworkPlaywright = (code: string, changes: string[]): string => {
-  let fixedCode = code;
-
-  const alreadyRouted = fixedCode.includes("page.route");
-  const hasNavigation =
-    fixedCode.includes("page.goto") || fixedCode.includes("page.navigate");
-
-  if (hasNavigation && !alreadyRouted) {
-    fixedCode = fixedCode.replace(
-      /([ \t]*)(await\s+page\.goto\s*\([^)]+\))/,
-      (match, indent, gotoCall) => {
-        changes.push(
-          "Added page.route to intercept network requests before navigation",
-        );
-        return (
-          `${indent}await page.route('**/api/**', route => route.fulfill({ status: 200, body: '{}' }));\n` +
-          `${indent}${gotoCall}`
-        );
-      },
-    );
-  }
-
+ 
+  fixedCode = fixedCode.replace(
+    /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));?/g,
+    (match, indent, expectStatement) => {
+      if (!isSingleLineBalanced(match)) return match;
+ 
+      if (
+        fixedCode.includes(
+          `waitFor(() => {\n${indent}${expectStatement}`,
+        )
+      ) {
+        return match;
+      }
+ 
+      changes.push("Wrapped assertion in waitFor to handle async DOM updates");
+      return (
+        `${indent}await waitFor(() => {\n` +
+        `${indent}  ${expectStatement};\n` +
+        `${indent}});`
+      );
+    },
+  );
+ 
   return fixedCode;
 };
 
@@ -309,24 +279,7 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
     }
   }
 
-  if (framework === "playwright") {
-    fixedCode = fixedCode.replace(
-      /await\s+page\.waitForTimeout\s*\(\s*\d+\s*\)/g,
-      () => {
-        changes.push("Replaced page.waitForTimeout with page.waitForLoadState");
-        return "await page.waitForLoadState('networkidle')";
-      },
-    );
-  }
 
-  if (framework === "cypress") {
-    fixedCode = fixedCode.replace(/cy\.wait\s*\(\s*\d+\s*\)/g, () => {
-      changes.push(
-        "Replaced cy.wait(number) — update the TODO with your actual assertion",
-      );
-      return `/* TODO: replace with cy.get('[data-testid="..."]').should('be.visible') */`;
-    });
-  }
 
   if (
     changes.some((c) => c.includes("waitFor")) &&
@@ -351,14 +304,7 @@ const fixNetwork = (input: RuleEngineInput): RuleEngineOutput => {
 
   if (framework === "jest" || framework === "vitest") {
     fixedCode = fixNetworkJestVitest(fixedCode, framework, changes);
-  } else if (framework === "mocha") {
-    fixedCode = fixNetworkMocha(fixedCode, changes);
-  } else if (framework === "cypress") {
-    fixedCode = fixNetworkCypress(fixedCode, changes);
-  } else if (framework === "playwright") {
-    fixedCode = fixNetworkPlaywright(fixedCode, changes);
-  }
-
+  } 
   return {
     fixedCode,
     explanation: buildExplanation(testName, "network", changes),

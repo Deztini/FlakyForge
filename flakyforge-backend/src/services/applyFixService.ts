@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { TestRun } from "../models/TestRun";
 import { Repository } from "../models/Repository";
 import { User } from "../models/User";
-import { RuleEngineService } from "./ruleEngineService";
+import { RuleEngineService } from "./ruleEngine/pipeline/ruleEngineService";
 import { GithubService } from "./githubService";
 import { ApiError } from "../utils/ApiError";
 

@@ -1,8 +1,8 @@
-import type { Framework } from "../../ruleEngineService";
+import type { Framework } from "../pipeline/ruleEngineService";
 import { detectTimingHelpers } from "../analyzer/detectTimingHelpers";
 import { detectHelperModule } from "../analyzer/detectHelperModule";
 import { buildHelperMocks } from "./buildHelperMock";
-import { injectAfterLastTest } from "../../ruleEngineService";
+import { injectAfterLastTest } from "../pipeline/ruleEngineService";
 
 export const fixRealTimingHelpers = (
   code: string,
