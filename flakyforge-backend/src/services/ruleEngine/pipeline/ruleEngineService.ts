@@ -1,4 +1,9 @@
 import { isSingleLineBalanced } from "../analyzer/isSingleLineBalanced";
+import { fixDoneCallbacks } from "../transformers/fixDoneCallbacks";
+import { fixRealTimingHelpers } from "../transformers/fixRealTimingHelpers";
+import { fixSetTimeoutDelays } from "../transformers/fixSetTimeoutDelay";
+import { fixSharedState } from "../transformers/fixSharedState";
+import { validateOutput } from "../validators/validateOutput";
 
 type FlakyType = "async wait" | "network";
 type AsyncSubType =
@@ -187,36 +192,27 @@ const fixWaitForWrapping = (
   framework: Framework,
   changes: string[],
 ): string => {
-  if (
-    framework !== "jest" &&
-    framework !== "vitest" &&
-    framework !== "mocha"
-  ) {
+  if (framework !== "jest" && framework !== "vitest") {
     return code;
   }
- 
+
   if (code.includes("waitFor")) return code;
- 
-  const hasAsyncActivity =
-    code.includes("await") || code.includes(".then(");
- 
+
+  const hasAsyncActivity = code.includes("await") || code.includes(".then(");
+
   if (!hasAsyncActivity) return code;
- 
+
   let fixedCode = code;
- 
+
   fixedCode = fixedCode.replace(
     /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));?/g,
     (match, indent, expectStatement) => {
       if (!isSingleLineBalanced(match)) return match;
- 
-      if (
-        fixedCode.includes(
-          `waitFor(() => {\n${indent}${expectStatement}`,
-        )
-      ) {
+
+      if (fixedCode.includes(`waitFor(() => {\n${indent}${expectStatement}`)) {
         return match;
       }
- 
+
       changes.push("Wrapped assertion in waitFor to handle async DOM updates");
       return (
         `${indent}await waitFor(() => {\n` +
@@ -225,7 +221,7 @@ const fixWaitForWrapping = (
       );
     },
   );
- 
+
   return fixedCode;
 };
 
@@ -234,52 +230,15 @@ const fixAsyncWait = (input: RuleEngineInput): RuleEngineOutput => {
   let fixedCode = testCode;
   const changes: string[] = [];
 
-  const setTimeoutDelayPattern =
-    /await\s+new\s+Promise\(\s*(\w+)\s*=>\s*setTimeout\s*\(\s*\1\s*,\s*[^)]+\)\s*\)/g;
+  fixedCode = fixSetTimeoutDelays(fixedCode, framework, changes);
 
-  fixedCode = fixedCode.replace(setTimeoutDelayPattern, () => {
-    changes.push("Replaced arbitrary setTimeout delay with proper async wait");
-    return getProperWaitReplacement(framework);
-  });
+  fixedCode = fixDoneCallbacks(fixedCode, changes);
 
-  const doneCallbackPattern = /\(\s*done\s*\)\s*=>\s*\{/g;
-  const beforeDone = fixedCode;
+  fixedCode = fixRealTimingHelpers(fixedCode, framework, changes);
 
-  fixedCode = fixedCode.replace(doneCallbackPattern, () => {
-    changes.push("Converted done-callback pattern to async/await");
-    return "async () => {";
-  });
+  fixedCode = fixSharedState(fixedCode, changes);
 
-  if (fixedCode !== beforeDone) {
-    fixedCode = fixedCode.replace(/\bdone\(\s*\)\s*;?/g, "");
-  }
-
-  if (
-    (framework === "jest" || framework === "vitest" || framework === "mocha") &&
-    !fixedCode.includes("waitFor")
-  ) {
-    const hasAsyncActivity =
-      fixedCode.includes("await") || fixedCode.includes(".then(");
-
-    if (hasAsyncActivity) {
-      fixedCode = fixedCode.replace(
-        /([ \t]*)(expect\([^)]+\)\.[a-zA-Z]+\([^)]*\));?/g,
-        (match, indent, expectStatement) => {
-          if (
-            fixedCode.includes(`waitFor(() => {\n${indent}${expectStatement}`)
-          ) {
-            return match;
-          }
-          changes.push(
-            "Wrapped assertion in waitFor to handle async DOM updates",
-          );
-          return `${indent}await waitFor(() => {\n${indent}  ${expectStatement};\n${indent}});`;
-        },
-      );
-    }
-  }
-
-
+  fixedCode = fixWaitForWrapping(fixedCode, framework, changes);
 
   if (
     changes.some((c) => c.includes("waitFor")) &&
@@ -304,7 +263,7 @@ const fixNetwork = (input: RuleEngineInput): RuleEngineOutput => {
 
   if (framework === "jest" || framework === "vitest") {
     fixedCode = fixNetworkJestVitest(fixedCode, framework, changes);
-  } 
+  }
   return {
     fixedCode,
     explanation: buildExplanation(testName, "network", changes),
@@ -313,14 +272,41 @@ const fixNetwork = (input: RuleEngineInput): RuleEngineOutput => {
 
 export const RuleEngineService = {
   applyFix(input: RuleEngineInput): RuleEngineOutput {
-    const { flakyType } = input;
+    const { flakyType, testCode, testName } = input;
 
-    if (flakyType === "async wait") return fixAsyncWait(input);
-    if (flakyType === "network") return fixNetwork(input);
+    let result: RuleEngineOutput;
+
+    if (flakyType === "async wait") {
+      result = fixAsyncWait(input);
+    } else if (flakyType === "network") {
+      result = fixNetwork(input);
+    } else { 
 
     return {
       fixedCode: input.testCode,
       explanation: `No fix rule matched for flaky type "${flakyType}". Manual review recommended.`,
     };
+
+  }
+
+    const { safe, reason } = validateOutput(
+      testCode,
+      result.fixedCode,
+      testName,
+    );
+
+    if (!safe) {
+      return {
+        fixedCode: testCode,
+        explanation:
+          `## Fix Aborted — Content Loss Detected\n\n` +
+          `**Test:** \`${testName}\`\n\n` +
+          `**Reason:** ${reason}\n\n` +
+          `**Action:** Original code preserved. Manual review is required.\n\n` +
+          `> This safety check was triggered by FlakeyRadar's content loss guard.`,
+      };
+    }
+
+    return result;
   },
 };
