@@ -14,7 +14,7 @@ export interface IRepository extends Document {
   flakyCount: number;
   fixedCount: number;
   lastScannedAt?: Date;
-  framework: "jest" | "vitest" | "mocha" | "cypress" | "playwright";
+  framework: "jest" | "vitest";
   apiKey: string;
 }
 
